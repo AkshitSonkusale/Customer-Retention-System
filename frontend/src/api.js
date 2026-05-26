@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE = 'http://localhost:8000'
+const BASE = "https://mall-customer-churn-prediction-system.onrender.com";
 
 export const api = {
   // Dataset

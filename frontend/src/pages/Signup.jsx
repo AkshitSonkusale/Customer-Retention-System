@@ -34,17 +34,26 @@ export default function Signup({ switchToLogin }) {
 
   /* ── Your existing signup logic — untouched ── */
   const handleSignup = async () => {
-    try {
-      setLoading(true)
-      setError("")
-      await axios.post("http://localhost:8000/auth/signup", { username, email, password })
-      switchToLogin()
-    } catch (err) {
-      setError(err?.response?.data?.detail || "Signup failed")
-    } finally {
-      setLoading(false)
-    }
+  try {
+    setLoading(true)
+    setError("")
+
+    await axios.post(
+      "https://customeriq-backend.onrender.com/auth/signup",
+      {
+        username,
+        email,
+        password,
+      }
+    )
+
+    switchToLogin()
+  } catch (err) {
+    setError(err?.response?.data?.detail || "Signup failed")
+  } finally {
+    setLoading(false)
   }
+}
 
   const onKey = e => e.key === "Enter" && handleSignup()
 

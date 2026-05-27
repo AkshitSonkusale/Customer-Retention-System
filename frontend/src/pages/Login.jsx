@@ -11,19 +11,28 @@ export default function Login({ onLogin, switchToSignup }) {
   const [showPass, setShowPass] = useState(false)
 
   /* ── Your existing login logic — untouched ── */
-  const handleLogin = async () => {
-    try {
-      setLoading(true)
-      setError("")
-      const res = await axios.post("http://localhost:8000/auth/login", { email, password })
-      localStorage.setItem("token", res.data.access_token)
-      onLogin()
-    } catch (err) {
-      setError(err?.response?.data?.detail || "Login failed")
-    } finally {
-      setLoading(false)
-    }
+ const handleLogin = async () => {
+  try {
+    setLoading(true)
+    setError("")
+
+    const res = await axios.post(
+      "https://customeriq-backend.onrender.com/auth/login",
+      {
+        email,
+        password,
+      }
+    )
+
+    localStorage.setItem("token", res.data.access_token)
+
+    onLogin()
+  } catch (err) {
+    setError(err?.response?.data?.detail || "Login failed")
+  } finally {
+    setLoading(false)
   }
+}
 
   const onKey = e => e.key === "Enter" && handleLogin()
 

@@ -147,6 +147,7 @@ def train_churn_model():
         return
 
     df = load_data()
+    print("DATASET COLUMNS:", df.columns.tolist())
 
     required_cols = [
         "Age",
@@ -159,9 +160,18 @@ def train_churn_model():
         "ChurnRisk"
     ]
 
-    for col in required_cols:
-        if col not in df.columns:
-            return
+    missing = [c for c in required_cols if c not in df.columns]
+
+    if missing:
+        print("MISSING COLUMNS:", missing)
+
+    _model_metrics = {
+        "accuracy": 0,
+        "precision": 0,
+        "recall": 0,
+        "f1": 0
+    }
+    return
 
     X = df[
         [

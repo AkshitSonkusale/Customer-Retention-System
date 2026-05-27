@@ -148,9 +148,9 @@ def assign_churn_risk(cluster_id: int, cluster_stats: dict) -> dict:
     stats = cluster_stats[cluster_id]
     spending = stats["avg_spending"]
 
-    if spending < 35:
+    if spending < 20:
         return {"risk": "High Risk",   "level": 3, "color": "#EF4444", "badge": "🔴"}
-    elif spending < 55:
+    elif spending < 60:
         return {"risk": "Medium Risk", "level": 2, "color": "#F59E0B", "badge": "🟡"}
     else:
         return {"risk": "Low Risk",    "level": 1, "color": "#10B981", "badge": "🟢"}

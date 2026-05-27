@@ -22,7 +22,7 @@ app = FastAPI(title="Mall Churn Prediction API", version="2.0.0")
 # Specify the actual frontend origin(s) instead.
 # Add every URL your frontend runs on (local dev + production).
 ALLOWED_ORIGINS = [
-    "https://customeriq-mdbl.onrender.com"
+    "https://customeriq-mdbl.onrender.com",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:3000",

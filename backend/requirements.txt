@@ -69,7 +69,7 @@ pydantic==2.13.4
 pydantic_core==2.46.4
 pydeck==0.9.1
 Pygments==2.20.0
-pymongo==4.7.2
+pymongo==4.9.2
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1

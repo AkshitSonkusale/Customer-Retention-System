@@ -330,7 +330,7 @@ This project demonstrates:
 
 - Machine Learning Model Development
 - Unsupervised Learning (K-Means)
-- Supervised Learning (Random Forest)
+- Supervised Learning (Random Forest classifier)
 - Feature Engineering
 - Data Preprocessing
 - FastAPI Backend Development
@@ -345,7 +345,7 @@ This project demonstrates:
 
 Akshit Sonkusale
 
-Computer Science Engineering Student
+Computer Science Engineering student specializing in Data Science
 
 Machine Learning • Data Science • Full Stack Development
 

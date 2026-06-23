@@ -29,17 +29,17 @@ export default function App() {
         if (info.source === 'upload') {
           setDataset({ filename: info.filename, rows: info.row_count, colMap: info.col_map })
         } else {
-          setDataset({ filename: 'synthetic_customer_dataset.csv', rows: 10000, isDefault: true })
+          setDataset({ filename: 'default_dataset.csv', rows: 200, isDefault: true })
         }
         setPage('dashboard')
       })
       .catch(() => {
-        setDataset({ filename: 'synthetic_customer_dataset.csv', rows: 10000, isDefault: true })
+        setDataset({ filename: 'default_dataset.csv', rows: 200, isDefault: true })
       })
   }, [authenticated])
 
   const handleDatasetReady = (ds) => {
-    setDataset(ds ?? { filename: 'synthetic_customer_dataset.csv', rows: 10000, isDefault: true })
+    setDataset(ds ?? { filename: 'default_dataset.csv', rows: 200, isDefault: true })
     setPage('dashboard')
   }
 

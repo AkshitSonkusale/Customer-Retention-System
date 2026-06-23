@@ -3,7 +3,7 @@ import { Mail, Lock, Eye, EyeOff, Info, MessageSquare, Layers, Activity, Cpu, Su
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
+const BASE = import.meta.env.VITE_API_URL || "https://customeriq-backend.onrender.com"
 
 export default function Login({ onLogin, switchToSignup }) {
   const [email,    setEmail]    = useState("")
@@ -23,20 +23,21 @@ export default function Login({ onLogin, switchToSignup }) {
   }
 
   const handleLogin = async () => {
-      if (!email.trim() || !password.trim()) {
-    setError('Email and password are required.')
-    return
-  }
-  if (!email.includes('@')) {
-    setError('Enter a valid email address.')
-    return
-  }
-  if (password.length < 6) {
-    setError('Password must be at least 6 characters.')
-    return
-  }
+    if (!email.trim() || !password.trim()) {
+      setError('Email and password are required.')
+      return
+    }
+    if (!email.includes('@')) {
+      setError('Enter a valid email address.')
+      return
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
     try {
-      setLoading(true); setError("")
+      setLoading(true)
+      setError("")
       const res = await axios.post(`${BASE}/auth/login`, { email, password })
       localStorage.setItem("token", res.data.token || res.data.access_token)
       onLogin()
@@ -46,12 +47,10 @@ export default function Login({ onLogin, switchToSignup }) {
       setLoading(false)
     }
   }
-}
 
   const onKey = e => e.key === "Enter" && handleLogin()
 
   const inputStyle = {
-    paddingLeft: 40,
     background: 'var(--bg)',
     border: '2px solid rgba(255,255,255,0.55)',
     padding: '11px 12px 11px 40px',
@@ -83,7 +82,6 @@ export default function Login({ onLogin, switchToSignup }) {
           <div style={{ width: 32, height: 32, background: 'var(--accent)', border: '2px solid rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: 14 }}>Ω</div>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
         </div>
-
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => aboutRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Info size={13} /> About
@@ -101,7 +99,6 @@ export default function Login({ onLogin, switchToSignup }) {
       {/* Main split */}
       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "140px 24px 80px", boxSizing: "border-box", position: "relative", zIndex: 10 }}>
         <AuthBackground />
-
         <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 64, width: "100%", maxWidth: 1040 }}>
 
           {/* Left — branding */}
@@ -225,7 +222,7 @@ export default function Login({ onLogin, switchToSignup }) {
         </div>
       </section>
 
-      {/* Footer / Contact */}
+      {/* Footer */}
       <footer ref={contactRef} style={{ background: "var(--bg2)", borderTop: "2px solid rgba(255,255,255,0.55)", padding: "48px 24px", position: "relative", zIndex: 10 }}>
         <div style={{ maxWidth: 1040, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
           <div>

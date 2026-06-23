@@ -1,5 +1,3 @@
-from pyexpat import features
-
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
@@ -147,6 +145,7 @@ def train_churn_model():
         return
 
     df = load_data()
+    print("DATASET COLUMNS:", df.columns.tolist())
 
     required_cols = [
         "Age",
@@ -159,9 +158,17 @@ def train_churn_model():
         "ChurnRisk"
     ]
 
-    for col in required_cols:
-        if col not in df.columns:
-            return
+    missing = [c for c in required_cols if c not in df.columns]
+
+    if missing:
+        print("MISSING COLUMNS:", missing)
+        _model_metrics = {
+            "accuracy": 0,
+            "precision": 0,
+            "recall": 0,
+            "f1": 0
+        }
+        return
 
     X = df[
         [
@@ -235,7 +242,6 @@ def get_model_metrics():
     return _model_metrics
 
 
-
 def predict_customer(
     age: int,
     income: int,
@@ -278,13 +284,13 @@ def predict_customer(
         cluster_stats
     )
 
+    # Default: use the cluster-based risk label
     churn_prediction = segment_risk["risk"]
     confidence = None
 
     train_churn_model()
 
     if _rf_model is not None:
-
         features = [[
             age,
             income,
@@ -296,26 +302,24 @@ def predict_customer(
         ]]
 
         pred = _rf_model.predict(features)[0]
-
         churn_prediction = _rf_label_encoder.inverse_transform([pred])[0]
 
+        # Convert RF labels to UI labels
+        if churn_prediction == "High":
+            churn_prediction = "High Risk"
+        elif churn_prediction == "Medium":
+            churn_prediction = "Medium Risk"
+        elif churn_prediction == "Low":
+            churn_prediction = "Low Risk"
 
-# Convert RF labels to UI labels
-    if churn_prediction == "High":
-        churn_prediction = "High Risk"
-    elif churn_prediction == "Medium":
-        churn_prediction = "Medium Risk"
-    elif churn_prediction == "Low":
-        churn_prediction = "Low Risk"
+        probs = _rf_model.predict_proba(features)[0]
 
-    probs = _rf_model.predict_proba(features)[0]
+        print("Classes:", _rf_label_encoder.classes_)
+        print("Prediction:", churn_prediction)
+        print("Probabilities:", probs)
+        print("Features:", features)
 
-    print("Classes:", _rf_label_encoder.classes_)
-    print("Prediction:", churn_prediction)
-    print("Probabilities:", probs)
-    print("Features:", features) 
-
-    confidence = round(
+        confidence = round(
             float(max(probs) * 100),
             1
         )

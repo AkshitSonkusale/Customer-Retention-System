@@ -1,7 +1,9 @@
-import { useState } from "react"
-import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { useState, useRef } from "react"
+import { Mail, Lock, Eye, EyeOff, Info, MessageSquare, Layers, Activity, Cpu, Sun, Moon } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export default function Login({ onLogin, switchToSignup }) {
   const [email,    setEmail]    = useState("")
@@ -9,17 +11,37 @@ export default function Login({ onLogin, switchToSignup }) {
   const [error,    setError]    = useState("")
   const [loading,  setLoading]  = useState(false)
   const [showPass, setShowPass] = useState(false)
+  const [theme,    setTheme]    = useState(document.documentElement.getAttribute("data-theme") || "dark")
 
-  /* ── Your existing login logic — untouched ── */
+  const aboutRef   = useRef(null)
+  const contactRef = useRef(null)
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark"
+    setTheme(next)
+    document.documentElement.setAttribute("data-theme", next)
+  }
+
   const handleLogin = async () => {
+      if (!email.trim() || !password.trim()) {
+    setError('Email and password are required.')
+    return
+  }
+  if (!email.includes('@')) {
+    setError('Enter a valid email address.')
+    return
+  }
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters.')
+    return
+  }
     try {
-      setLoading(true)
-      setError("")
-      const res = await axios.post("http://localhost:8000/auth/login", { email, password })
-      localStorage.setItem("token", res.data.access_token)
+      setLoading(true); setError("")
+      const res = await axios.post(`${BASE}/auth/login`, { email, password })
+      localStorage.setItem("token", res.data.token || res.data.access_token)
       onLogin()
     } catch (err) {
-      setError(err?.response?.data?.detail || "Login failed")
+      setError(err?.response?.data?.detail || "Invalid email or password")
     } finally {
       setLoading(false)
     }
@@ -27,164 +49,196 @@ export default function Login({ onLogin, switchToSignup }) {
 
   const onKey = e => e.key === "Enter" && handleLogin()
 
+  const inputStyle = {
+    paddingLeft: 40,
+    background: 'var(--bg)',
+    border: '2px solid rgba(255,255,255,0.55)',
+    padding: '11px 12px 11px 40px',
+    color: 'var(--text)',
+    fontSize: 13,
+    fontWeight: 600,
+    fontFamily: 'var(--font-body)',
+    outline: 'none',
+    width: '100%',
+    transition: 'border-color 0.12s, box-shadow 0.12s, transform 0.12s',
+  }
+
+  const labelStyle = {
+    fontSize: 10,
+    fontWeight: 800,
+    color: 'var(--text2)',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    marginBottom: 6,
+    display: 'block',
+  }
+
   return (
-    <main className="auth-page">
-      <AuthBackground />
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", position: "relative" }}>
 
-      {/* ══ Left branding ══ */}
-      <section className="auth-left">
-        <div className="brand-lockup">
-          <div className="brand-icon">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="14" fill="url(#lg1)" />
-              <path d="M14 24C14 18 18.5 14 24 14c3.5 0 6.5 1.8 8.5 4.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-              <circle cx="24" cy="24" r="4.5" fill="white" fillOpacity="0.9"/>
-              <circle cx="14" cy="30" r="3"   fill="white" fillOpacity="0.5"/>
-              <circle cx="34" cy="30" r="3"   fill="white" fillOpacity="0.5"/>
-              <line x1="17" y1="30" x2="21" y2="26" stroke="white" strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="31" y1="30" x2="27" y2="26" stroke="white" strokeWidth="1.5" strokeOpacity="0.4"/>
-              <defs>
-                <linearGradient id="lg1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#7c6ff7"/><stop offset="1" stopColor="#a78bfa"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span className="brand-name">CustomerIQ</span>
+      {/* Header */}
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, height: 64, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 28px", zIndex: 1000, background: "var(--bg)", borderBottom: "2px solid rgba(255,255,255,0.55)" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, background: 'var(--accent)', border: '2px solid rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: 14 }}>Ω</div>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
         </div>
 
-        <h1 className="auth-headline">
-          Understand your<br/>
-          <span className="gradient-text">customers deeply.</span>
-        </h1>
-
-        <p className="auth-sub">
-          ML-powered segmentation, churn prediction, and lifetime value
-          modeling — all in one unified intelligence platform.
-        </p>
-
-        <ul className="feature-list">
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            Cluster analysis across 200+ behavioural signals
-          </li>
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            Real-time churn risk scoring with explainability
-          </li>
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            LTV forecasting powered by ensemble models
-          </li>
-        </ul>
-
-        </section>
-
-      {/* ══ Right card ══ */}
-      <section className="auth-card-wrap">
-        <div className="auth-card">
-          <div className="auth-card-header">
-            <h2>Welcome back</h2>
-            <p className="auth-card-sub">Sign in to your CustomerIQ workspace</p>
-          </div>
-
-          {/* Email */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="login-email">Email address</label>
-            <div className="input-wrap">
-              <span className="input-icon"><Mail size={15} /></span>
-              <input
-                id="login-email"
-                className="form-input"
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={onKey}
-                autoComplete="email"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="login-pass">
-              Password
-              <a href="#" className="forgot-link" onClick={e => e.preventDefault()}>
-                Forgot password?
-              </a>
-            </label>
-            <div className="input-wrap">
-              <span className="input-icon"><Lock size={15} /></span>
-              <input
-                id="login-pass"
-                className="form-input"
-                type={showPass ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                onKeyDown={onKey}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="toggle-pass"
-                onClick={() => setShowPass(v => !v)}
-                aria-label="Toggle password"
-              >
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Error */}
-          <div className={`auth-error${error ? " visible" : ""}`}>{error}</div>
-
-          {/* Submit */}
-          <button
-            className={`btn-primary${loading ? " loading" : ""}`}
-            onClick={handleLogin}
-            disabled={loading}
-          >
-            {!loading && <LogIn size={16} />}
-            <span className="btn-text">
-              {loading ? "Signing in…" : "Sign in"}
-            </span>
-            <span className="btn-spinner" />
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => aboutRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Info size={13} /> About
           </button>
-
-          {/* Divider + social stubs */}
-          <div className="divider"><span>or continue with</span></div>
-          <div className="social-row">
-            <button className="btn-social" type="button">
-              <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              Google
-            </button>
-            <button className="btn-social" type="button">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
-                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-              </svg>
-              GitHub
-            </button>
-          </div>
-
-          <p className="auth-switch">
-            Don't have an account?{" "}
-            <button type="button" className="switch-link" onClick={switchToSignup}>
-              Create one free
-            </button>
-          </p>
+          <button onClick={() => contactRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <MessageSquare size={13} /> Contact
+          </button>
+          <button onClick={toggleTheme} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
         </div>
+      </header>
 
-        <p className="auth-footer">
-          Protected by industry-standard encryption · SOC 2 Type II
-        </p>
+      {/* Main split */}
+      <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "140px 24px 80px", boxSizing: "border-box", position: "relative", zIndex: 10 }}>
+        <AuthBackground />
+
+        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 64, width: "100%", maxWidth: 1040 }}>
+
+          {/* Left — branding */}
+          <section style={{ flex: "1 1 420px", maxWidth: 480, minWidth: 320 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+              <div style={{ width: 50, height: 50, border: "2px solid rgba(255,255,255,0.55)", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: '4px 4px 0px rgba(0,0,0,0.8)' }}>Ω</div>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 30, textTransform: "uppercase", letterSpacing: 4 }}>CustomerIQ</span>
+            </div>
+
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 400, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+              Understand your<br/>
+              <span style={{ color: "var(--accent2)" }}>customers deeply.</span>
+            </h1>
+
+            <p style={{ fontSize: 13, color: "var(--text2)", fontWeight: 600, marginBottom: 24, lineHeight: 1.7 }}>
+              ML-powered segmentation, churn prediction, and lifetime value modeling — all in one unified intelligence platform.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+              {['Cluster analysis across behavioural signals', 'Real-time churn risk scoring insights', 'LTV forecasting powered by ensemble models'].map(f => (
+                <div key={f} className="feature-pill">→ {f}</div>
+              ))}
+            </div>
+
+            <div className="stat-strip">
+              <div className="stat-item">
+                <div className="stat-num">K-Means<span className="stat-suffix" style={{ color: 'var(--accent)', fontSize: 14 }}>++</span></div>
+                <span className="stat-desc">Optimized Seeding</span>
+              </div>
+              <div className="stat-divider" />
+              <div className="stat-item">
+                <div className="stat-num">&lt;200<span className="stat-suffix" style={{ color: 'var(--accent)', fontSize: 14 }}>ms</span></div>
+                <span className="stat-desc">Inference Speed</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Right — login card */}
+          <section style={{ flex: "0 1 400px", minWidth: 340 }}>
+            <div className="auth-card" style={{ padding: 36, width: "100%", boxSizing: "border-box" }}>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 400, textTransform: "uppercase", letterSpacing: 3 }}>Welcome Back</h2>
+                <p style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Sign in to your CustomerIQ workspace</p>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Email Address</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Mail size={15} /></span>
+                  <input style={inputStyle} type="email" placeholder="you@company.com"
+                    value={email} onChange={e => setEmail(e.target.value)} onKeyDown={onKey}
+                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='3px 3px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
+                    onBlur={e => { e.target.style.borderColor='rgba(255,255,255,0.55)'; e.target.style.boxShadow='none'; e.target.style.transform='none' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <label style={labelStyle}>Password</label>
+                  <a href="#forgot" style={{ fontSize: 10, color: "var(--text3)", fontWeight: 700, textDecoration: "none", textTransform: 'uppercase', letterSpacing: 0.5 }}>Forgot?</a>
+                </div>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Lock size={15} /></span>
+                  <input style={inputStyle} type={showPass ? "text" : "password"} placeholder="••••••••"
+                    value={password} onChange={e => setPassword(e.target.value)} onKeyDown={onKey}
+                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='3px 3px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
+                    onBlur={e => { e.target.style.borderColor='rgba(255,255,255,0.55)'; e.target.style.boxShadow='none'; e.target.style.transform='none' }}
+                  />
+                  <button type="button" onClick={() => setShowPass(v => !v)}
+                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text3)" }}>
+                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div style={{ color: "var(--high)", fontWeight: 800, fontSize: 11, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1, border: "2px solid var(--high)", padding: "8px 12px" }}>
+                  ⚠ {error}
+                </div>
+              )}
+
+              <button className="btn-primary" onClick={handleLogin} disabled={loading} style={{ marginTop: 0 }}>
+                {loading ? "Signing in…" : "Sign In →"}
+              </button>
+
+              <p className="auth-switch" style={{ marginTop: 16 }}>
+                No account?{" "}
+                <button type="button" className="switch-link" onClick={switchToSignup}>Create one free</button>
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* About section */}
+      <section ref={aboutRef} style={{ padding: "80px 24px", maxWidth: 1040, margin: "0 auto", position: "relative", zIndex: 10 }}>
+        <div style={{ borderTop: "2px solid rgba(255,255,255,0.55)", paddingTop: 48 }}>
+          <div className="card">
+            <div className="card-title" style={{ color: "var(--accent2)" }}>Platform Objective</div>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 38, fontWeight: 400, marginBottom: 16, textTransform: "uppercase", letterSpacing: 3 }}>
+              Advanced Intelligence For Modern Retention
+            </h2>
+            <p style={{ color: "var(--text2)", fontSize: 13, lineHeight: 1.7, marginBottom: 32, fontWeight: 600 }}>
+              CustomerIQ transforms raw customer data into clean, actionable insight streams. K-Means clustering assigns distinct behavioural risk profiles to customer segments, while Random Forest classification validates and predicts individual churn probability.
+            </p>
+            <div className="grid-3">
+              {[
+                { icon: <Layers size={20} />, title: 'Dynamic Clustering', desc: 'Segment customers by income and spending patterns using optimized K-Means++ seeding.' },
+                { icon: <Activity size={20} />, title: 'Elbow Method', desc: 'Track WCSS across k values to find the optimal number of clusters for your dataset.' },
+                { icon: <Cpu size={20} />, title: 'RF Classification', desc: 'Random Forest validates cluster assignments using all 7 behavioural features.' },
+              ].map(c => (
+                <div key={c.title} className="card" style={{ background: "var(--bg3)", padding: 24 }}>
+                  <div style={{ color: "var(--accent2)", marginBottom: 12 }}>{c.icon}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 17, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>{c.title}</div>
+                  <p style={{ color: "var(--text2)", fontSize: 12, lineHeight: 1.6, fontWeight: 600 }}>{c.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
-    </main>
+
+      {/* Footer / Contact */}
+      <footer ref={contactRef} style={{ background: "var(--bg2)", borderTop: "2px solid rgba(255,255,255,0.55)", padding: "48px 24px", position: "relative", zIndex: 10 }}>
+        <div style={{ maxWidth: 1040, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 20, letterSpacing: 3, textTransform: "uppercase", marginBottom: 6 }}>CustomerIQ</div>
+            <p style={{ color: "var(--text3)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              Precision analytics for automated customer retention.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 24, fontSize: 12, color: "var(--text2)", fontWeight: 700 }}>
+            <span>support@customeriq.internal</span>
+            <span>+1 (555) 839-2091</span>
+          </div>
+        </div>
+      </footer>
+    </div>
   )
 }

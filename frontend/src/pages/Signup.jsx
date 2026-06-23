@@ -1,25 +1,25 @@
 import { useState } from "react"
-import { User, Mail, Lock, Eye, EyeOff, Building2 } from "lucide-react"
+import { User, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
 
-/* Password strength scorer */
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 function scorePassword(pw) {
   if (!pw) return { level: 0, label: "", color: "" }
   let s = 0
-  if (pw.length >= 8)  s++
-  if (pw.length >= 12) s++
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++
-  if (/\d/.test(pw))   s++
-  if (/[^a-zA-Z0-9]/.test(pw)) s++
-  const levels = [
+  if (pw.length >= 8)                          s++
+  if (pw.length >= 12)                         s++
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw))   s++
+  if (/\d/.test(pw))                           s++
+  if (/[^a-zA-Z0-9]/.test(pw))                s++
+  return [
     { level: 0, label: "",       color: "" },
-    { level: 1, label: "Weak",   color: "#ef4444" },
-    { level: 2, label: "Fair",   color: "#f59e0b" },
-    { level: 3, label: "Good",   color: "#10b981" },
-    { level: 4, label: "Strong", color: "#7c6ff7" },
-  ]
-  return levels[Math.min(4, s)]
+    { level: 1, label: "Weak",   color: "var(--high)" },
+    { level: 2, label: "Fair",   color: "var(--med)" },
+    { level: 3, label: "Good",   color: "var(--low)" },
+    { level: 4, label: "Strong", color: "var(--accent2)" },
+  ][Math.min(4, s)]
 }
 
 export default function Signup({ switchToLogin }) {
@@ -32,15 +32,32 @@ export default function Signup({ switchToLogin }) {
 
   const strength = scorePassword(password)
 
-  /* ── Your existing signup logic — untouched ── */
   const handleSignup = async () => {
+    // Validation
+    if (!username.trim() || !email.trim() || !password.trim()) {
+      setError('All fields are required.')
+      return
+    }
+    if (username.trim().length < 2) {
+      setError('Username must be at least 2 characters.')
+      return
+    }
+    if (!email.includes('@')) {
+      setError('Enter a valid email address.')
+      return
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+
     try {
       setLoading(true)
       setError("")
-      await axios.post("http://localhost:8000/auth/signup", { username, email, password })
+      await axios.post(`${BASE}/auth/signup`, { username, email, password })
       switchToLogin()
     } catch (err) {
-      setError(err?.response?.data?.detail || "Signup failed")
+      setError(err?.response?.data?.detail || "Signup failed. Try again.")
     } finally {
       setLoading(false)
     }
@@ -48,173 +65,169 @@ export default function Signup({ switchToLogin }) {
 
   const onKey = e => e.key === "Enter" && handleSignup()
 
+  const inputStyle = {
+    background: 'var(--bg)',
+    border: '2px solid rgba(255,255,255,0.55)',
+    padding: '11px 12px 11px 40px',
+    color: 'var(--text)',
+    fontSize: 13,
+    fontWeight: 600,
+    fontFamily: 'var(--font-body)',
+    outline: 'none',
+    width: '100%',
+    transition: 'border-color 0.12s, box-shadow 0.12s, transform 0.12s',
+  }
+
+  const labelStyle = {
+    fontSize: 10,
+    fontWeight: 800,
+    color: 'var(--text2)',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    marginBottom: 6,
+    display: 'block',
+  }
+
+  const onFocus = e => {
+    e.target.style.borderColor = 'var(--accent)'
+    e.target.style.boxShadow   = '3px 3px 0px var(--accent)'
+    e.target.style.transform   = 'translate(-1px,-1px)'
+  }
+
+  const onBlur = e => {
+    e.target.style.borderColor = 'rgba(255,255,255,0.55)'
+    e.target.style.boxShadow   = 'none'
+    e.target.style.transform   = 'none'
+  }
+
   return (
-    <main className="auth-page">
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", position: "relative" }}>
       <AuthBackground />
 
-      {/* ══ Left branding ══ */}
-      <section className="auth-left">
-        <div className="brand-lockup">
-          <div className="brand-icon">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="14" fill="url(#lg2)" />
-              <path d="M14 24C14 18 18.5 14 24 14c3.5 0 6.5 1.8 8.5 4.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-              <circle cx="24" cy="24" r="4.5" fill="white" fillOpacity="0.9"/>
-              <circle cx="14" cy="30" r="3"   fill="white" fillOpacity="0.5"/>
-              <circle cx="34" cy="30" r="3"   fill="white" fillOpacity="0.5"/>
-              <line x1="17" y1="30" x2="21" y2="26" stroke="white" strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="31" y1="30" x2="27" y2="26" stroke="white" strokeWidth="1.5" strokeOpacity="0.4"/>
-              <defs>
-                <linearGradient id="lg2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#7c6ff7"/><stop offset="1" stopColor="#a78bfa"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span className="brand-name">CustomerIQ</span>
-        </div>
+      <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "100px 24px 60px", boxSizing: "border-box", position: "relative", zIndex: 10 }}>
+        <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start", gap: 64, width: "100%", maxWidth: 1040 }}>
 
-        <h1 className="auth-headline">
-          Get started<br/>
-          <span className="gradient-text">for free today.</span>
-        </h1>
-
-        <p className="auth-sub">
-          Join thousands of product and data teams using CustomerIQ to
-          understand, retain, and grow their customer base.
-        </p>
-
-        <ul className="feature-list">
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            No credit card required — free tier included
-          </li>
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            Connect your data source in under 5 minutes
-          </li>
-          <li className="feature-pill">
-            <span className="pill-icon">⬡</span>
-            ML models train automatically on your data
-          </li>
-        </ul>
-
-        </section>
-
-      {/* ══ Right card ══ */}
-      <section className="auth-card-wrap">
-        <div className="auth-card">
-          <div className="auth-card-header">
-            <h2>Create your account</h2>
-            <p className="auth-card-sub">Start your CustomerIQ journey — it's free</p>
-          </div>
-
-          {/* Username */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="signup-username">Username</label>
-            <div className="input-wrap">
-              <span className="input-icon"><User size={15} /></span>
-              <input
-                id="signup-username"
-                className="form-input"
-                placeholder="ada_lovelace"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                onKeyDown={onKey}
-                autoComplete="username"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="signup-email">Work email</label>
-            <div className="input-wrap">
-              <span className="input-icon"><Mail size={15} /></span>
-              <input
-                id="signup-email"
-                className="form-input"
-                type="email"
-                placeholder="ada@company.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={onKey}
-                autoComplete="email"
-              />
-            </div>
-          </div>
-
-          {/* Password + strength */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="signup-pass">Password</label>
-            <div className="input-wrap">
-              <span className="input-icon"><Lock size={15} /></span>
-              <input
-                id="signup-pass"
-                className="form-input"
-                type={showPass ? "text" : "password"}
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                onKeyDown={onKey}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className="toggle-pass"
-                onClick={() => setShowPass(v => !v)}
-                aria-label="Toggle password"
-              >
-                {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
+          {/* Left — branding */}
+          <section style={{ flex: "1 1 420px", maxWidth: 500, minWidth: 320 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+              <div style={{ width: 50, height: 50, border: "2px solid rgba(255,255,255,0.55)", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: '4px 4px 0px rgba(0,0,0,0.8)' }}>Ω</div>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 30, textTransform: "uppercase", letterSpacing: 4 }}>CustomerIQ</span>
             </div>
 
-            {/* Strength meter — only shown when typing */}
-            {password && (
-              <div className="strength-wrap">
-                <div className="strength-bar">
-                  <div
-                    className="strength-fill"
-                    style={{
-                      width: `${strength.level * 25}%`,
-                      background: strength.color,
-                    }}
-                  />
-                </div>
-                <span className="strength-label" style={{ color: strength.color }}>
-                  {strength.label}
-                </span>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 400, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+              Build smarter<br/>
+              <span style={{ color: "var(--accent2)" }}>growth strategies.</span>
+            </h1>
+
+            <p style={{ fontSize: 13, color: "var(--text2)", fontWeight: 600, marginBottom: 24, lineHeight: 1.7 }}>
+              ML-powered segmentation, churn prediction, and lifetime value modeling — all in one unified intelligence platform.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 28 }}>
+              {[
+                'Cluster analysis across behavioural signals',
+                'Real-time churn risk scoring with explainability',
+                'LTV forecasting powered by ensemble models',
+              ].map(f => (
+                <div key={f} className="feature-pill">→ {f}</div>
+              ))}
+            </div>
+
+            <div className="stat-strip">
+              <div className="stat-item">
+                <div className="stat-num">98.95<span style={{ color: 'var(--accent)', fontSize: 16, fontFamily: 'var(--font-display)' }}>%</span></div>
+                <span className="stat-desc">Model Accuracy</span>
               </div>
-            )}
-          </div>
+              <div className="stat-divider" />
+              <div className="stat-item">
+                <div className="stat-num">10K<span style={{ color: 'var(--accent)', fontSize: 16, fontFamily: 'var(--font-display)' }}>+</span></div>
+                <span className="stat-desc">Data Points</span>
+              </div>
+            </div>
+          </section>
 
-          {/* Error */}
-          <div className={`auth-error${error ? " visible" : ""}`}>{error}</div>
+          {/* Right — signup card */}
+          <section style={{ flex: "0 1 400px", minWidth: 340 }}>
+            <div className="auth-card" style={{ padding: 36, width: "100%", boxSizing: "border-box" }}>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 400, textTransform: "uppercase", letterSpacing: 3 }}>Create Account</h2>
+                <p style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 }}>
+                  Start your CustomerIQ journey — it's free
+                </p>
+              </div>
 
-          {/* Submit */}
-          <button
-            className={`btn-primary${loading ? " loading" : ""}`}
-            onClick={handleSignup}
-            disabled={loading}
-          >
-            <span className="btn-text">
-              {loading ? "Creating account…" : "Create account"}
-            </span>
-            <span className="btn-spinner" />
-          </button>
+              {/* Username */}
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Username</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><User size={15} /></span>
+                  <input style={inputStyle} placeholder="ada_lovelace"
+                    value={username} onChange={e => setUsername(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+              </div>
 
-          <p className="auth-switch">
-            Already have an account?{" "}
-            <button type="button" className="switch-link" onClick={switchToLogin}>
-              Sign in
-            </button>
-          </p>
+              {/* Email */}
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Work Email</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Mail size={15} /></span>
+                  <input style={inputStyle} type="email" placeholder="ada@company.com"
+                    value={email} onChange={e => setEmail(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="form-group" style={{ marginBottom: 20 }}>
+                <label style={labelStyle}>Password</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Lock size={15} /></span>
+                  <input style={inputStyle} type={showPass ? "text" : "password"} placeholder="Min. 6 characters"
+                    value={password} onChange={e => setPassword(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
+                  <button type="button" onClick={() => setShowPass(v => !v)}
+                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text3)" }}>
+                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+
+                {/* Password strength bar */}
+                {password && (
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                    <div style={{ flex: 1, height: 6, background: "var(--bg3)", border: "2px solid rgba(255,255,255,0.55)", position: "relative", overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${strength.level * 25}%`, background: strength.color, transition: "width 0.3s ease" }} />
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: strength.color, textTransform: "uppercase", letterSpacing: 1, minWidth: 40 }}>
+                      {strength.label}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div style={{ color: "var(--high)", fontWeight: 800, fontSize: 11, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1, border: "2px solid var(--high)", padding: "8px 12px" }}>
+                  ⚠ {error}
+                </div>
+              )}
+
+              <button className="btn-primary" onClick={handleSignup} disabled={loading}>
+                {loading ? "Creating account…" : "Create Account →"}
+              </button>
+
+              <p className="auth-switch" style={{ marginTop: 16 }}>
+                Already have an account?{" "}
+                <button type="button" className="switch-link" onClick={switchToLogin}>Sign in</button>
+              </p>
+            </div>
+
+            <p style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 10, color: "var(--text3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              <ShieldCheck size={13} style={{ color: "var(--low)" }} />
+              Protected by industry-standard encryption
+            </p>
+          </section>
         </div>
-
-        <p className="auth-footer">
-          Protected by industry-standard encryption · SOC 2 Type II
-        </p>
-      </section>
-    </main>
+      </div>
+    </div>
   )
 }

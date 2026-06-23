@@ -13,123 +13,97 @@ from auth import (
     hash_password,
     verify_password,
     create_access_token,
-    get_current_user
+    get_current_user,
 )
 
 app = FastAPI(title="Mall Churn Prediction API", version="2.0.0")
+
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-_pending: dict = {}  # token -> {"df": DataFrame, "filename": str}
+_pending: dict = {}
 
 
 @app.get("/")
 def root():
     return {"message": "Mall Churn API v2", "status": "running"}
 
+
 @app.get("/test-db")
 def test_db():
-    return {
-        "connected": True,
-        "database": db.name
-    }
+    return {"connected": True, "database": db.name}
+
 
 class SignupRequest(BaseModel):
     username: str
-    email: str
+    email:    str
     password: str
 
+
 class LoginRequest(BaseModel):
-    email: str
+    email:    str
     password: str
+
 
 @app.post("/auth/signup")
 def signup(req: SignupRequest):
+    # Validation
+    if not req.username or not req.email or not req.password:
+        raise HTTPException(status_code=400, detail="All fields are required.")
+    if len(req.username.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Username must be at least 2 characters.")
+    if "@" not in req.email:
+        raise HTTPException(status_code=400, detail="Enter a valid email address.")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
 
-    existing_user = users_collection.find_one(
-        {"email": req.email}
-    )
-
+    existing_user = users_collection.find_one({"email": req.email})
     if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=400, detail="Email already registered.")
 
-    hashed_password = hash_password(
-        req.password
-    )
-
+    hashed_password = hash_password(req.password)
     user = {
-        "username": req.username,
-        "email": req.email,
-        "password_hash": hashed_password
+        "username":      req.username.strip(),
+        "email":         req.email.lower().strip(),
+        "password_hash": hashed_password,
     }
-
     users_collection.insert_one(user)
 
-    token = create_access_token(
-        {
-            "email": req.email,
-            "username": req.username
-        }
-    )
+    token = create_access_token({"email": req.email, "username": req.username})
+    return {"message": "Signup successful", "access_token": token, "token": token, "token_type": "bearer"}
 
-    return {
-        "message": "Signup successful",
-        "access_token": token,
-        "token_type": "bearer"
-    }
 
 @app.post("/auth/login")
 def login(req: LoginRequest):
+    # Validation
+    if not req.email or not req.password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+    if "@" not in req.email:
+        raise HTTPException(status_code=400, detail="Enter a valid email address.")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
 
-    user = users_collection.find_one(
-        {"email": req.email}
-    )
-
+    user = users_collection.find_one({"email": req.email.lower().strip()})
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-    valid = verify_password(
-        req.password,
-        user["password_hash"]
-    )
-
+    valid = verify_password(req.password, user["password_hash"])
     if not valid:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-    token = create_access_token(
-        {
-            "email": user["email"],
-            "username": user["username"]
-        }
-    )
+    token = create_access_token({"email": user["email"], "username": user["username"]})
+    return {"message": "Login successful", "access_token": token, "token": token, "token_type": "bearer"}
 
-    return {
-        "message": "Login successful",
-        "access_token": token,
-        "token_type": "bearer"
-    }
 
 @app.get("/auth/me")
-def me(
-    current_user=Depends(
-        get_current_user
-    )
-):
-    return {
-        "username": current_user["username"],
-        "email": current_user["email"]
-    }
+def me(current_user=Depends(get_current_user)):
+    return {"username": current_user["username"], "email": current_user["email"]}
+
 
 @app.post("/upload")
 async def upload_csv(file: UploadFile = File(...)):
@@ -155,11 +129,11 @@ async def upload_csv(file: UploadFile = File(...)):
         return None
 
     suggestion = {
-        "id":       guess(all_cols,                       ["id", "customerid", "customer_id", "cust"]),
-        "gender":   guess(categorical_cols + all_cols,    ["gender", "sex"]),
-        "age":      guess(numeric_cols,                   ["age"]),
-        "income":   guess(numeric_cols,                   ["income", "salary", "earning", "annual"]),
-        "spending": guess(numeric_cols,                   ["spending", "score", "spend", "purchase"]),
+        "id":       guess(all_cols,                    ["id", "customerid", "customer_id", "cust"]),
+        "gender":   guess(categorical_cols + all_cols, ["gender", "sex"]),
+        "age":      guess(numeric_cols,                ["age"]),
+        "income":   guess(numeric_cols,                ["income", "salary", "earning", "annual"]),
+        "spending": guess(numeric_cols,                ["spending", "score", "spend", "purchase"]),
     }
 
     token = str(uuid.uuid4())
@@ -206,7 +180,12 @@ def confirm_upload(body: ConfirmBody):
     store_upload(df, body.col_map, filename)
     del _pending[body.token]
 
-    return {"status": "ok", "filename": filename, "rowsLoaded": len(df), "colMap": body.col_map}
+    return {
+        "status":     "ok",
+        "filename":   filename,
+        "rowsLoaded": len(df),
+        "colMap":     body.col_map,
+    }
 
 
 @app.get("/dataset/info")
@@ -216,12 +195,15 @@ def dataset_info():
         return {"source": "upload", **info}
     return {
         "source":    "default",
-        "filename":  "Mall_Customers.csv",
-        "row_count": 200,
+        "filename":  "synthetic_customer_dataset.csv",
+        "row_count": 10000,
         "col_map": {
-            "id": "CustomerID", "gender": "Gender",
-            "age": "Age", "income": "AnnualIncome", "spending": "SpendingScore"
-        }
+            "id":       "CustomerID",
+            "gender":   "Gender",
+            "age":      "Age",
+            "income":   "AnnualIncome",
+            "spending": "SpendingScore",
+        },
     }
 
 
@@ -263,17 +245,15 @@ def get_summary(k: int = Query(default=5, ge=2, le=10)):
     }
 
 
-
 class PredictRequest(BaseModel):
-    age: float
-    annualIncome: float
-    spendingScore: float
-    gender: str = "Unknown"
-
-    visitFrequency: float = 0
+    age:               float
+    annualIncome:      float
+    spendingScore:     float
+    gender:            str   = "Unknown"
+    visitFrequency:    float = 0
     satisfactionScore: float = 5
-    complaintsCount: float = 0
-    loyaltyPoints: float = 0
+    complaintsCount:   float = 0
+    loyaltyPoints:     float = 0
 
 
 @app.post("/predict")
@@ -287,10 +267,9 @@ def predict(req: PredictRequest):
         req.satisfactionScore,
         req.complaintsCount,
         req.loyaltyPoints,
-
     )
+
+
 @app.get("/metrics")
 def metrics():
     return get_model_metrics()
-
-    

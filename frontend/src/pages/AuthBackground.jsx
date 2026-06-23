@@ -1,9 +1,5 @@
 import { useEffect, useRef } from "react"
 
-/**
- * Renders the animated particle-mesh canvas and cursor glow.
- * Drop this inside any auth page wrapper — it positions itself fixed.
- */
 export default function AuthBackground() {
   const canvasRef = useRef(null)
   const glowRef   = useRef(null)
@@ -13,7 +9,6 @@ export default function AuthBackground() {
     const glow   = glowRef.current
     const ctx    = canvas.getContext("2d")
 
-    /* ── Sizing ── */
     let W, H
     const resize = () => {
       W = canvas.width  = window.innerWidth
@@ -22,7 +17,6 @@ export default function AuthBackground() {
     resize()
     window.addEventListener("resize", resize)
 
-    /* ── Mouse ── */
     const mouse = { x: -1000, y: -1000 }
     let cx = -1000, cy = -1000
 
@@ -32,22 +26,25 @@ export default function AuthBackground() {
     }
     window.addEventListener("mousemove", onMove)
 
-    /* ── Cursor glow lerp ── */
     let glowRaf
     const lerpGlow = () => {
       cx += (mouse.x - cx) * 0.09
       cy += (mouse.y - cy) * 0.09
-      glow.style.left = cx + "px"
-      glow.style.top  = cy + "px"
+      if (glow) {
+        glow.style.left = cx + "px"
+        glow.style.top  = cy + "px"
+      }
       glowRaf = requestAnimationFrame(lerpGlow)
     }
     lerpGlow()
 
-    /* ── Particles ── */
+    const isLightTheme = () => document.documentElement.getAttribute("data-theme") === "light"
+
     const COUNT      = 100
     const MAX_DIST   = 130
     const MOUSE_RAD  = 175
-    const HUES       = [245, 250, 260, 165]
+    const DARK_HUES  = [245, 250, 260, 165]
+    const LIGHT_HUES = [20, 25, 32, 15]
 
     class Particle {
       constructor() { this.reset(true) }
@@ -58,7 +55,8 @@ export default function AuthBackground() {
         this.vx    = (Math.random() - 0.5) * 0.3
         this.vy    = Math.random() * 0.22 + 0.08
         this.alpha = Math.random() * 0.5 + 0.15
-        this.hue   = HUES[Math.floor(Math.random() * HUES.length)]
+        const currentHues = isLightTheme() ? LIGHT_HUES : DARK_HUES
+        this.hue = currentHues[Math.floor(Math.random() * currentHues.length)]
       }
       update() {
         const dx = this.x - mouse.x, dy = this.y - mouse.y
@@ -75,18 +73,23 @@ export default function AuthBackground() {
       draw() {
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
-        ctx.fillStyle = `hsla(${this.hue},70%,70%,${this.alpha})`
+        if (isLightTheme()) {
+          ctx.fillStyle = `hsla(${this.hue}, 95%, 50%, ${this.alpha * 0.75})`
+        } else {
+          ctx.fillStyle = `hsla(${this.hue}, 70%, 70%, ${this.alpha})`
+        }
         ctx.fill()
       }
     }
 
     const particles = Array.from({ length: COUNT }, () => new Particle())
 
-    /* ── Render loop ── */
     let animRaf
     const loop = () => {
       ctx.clearRect(0, 0, W, H)
-      // connections
+      const lightActive = isLightTheme()
+      const strokeRGB = lightActive ? "234, 88, 12" : "124, 111, 247"
+
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const a = particles[i], b = particles[j]
@@ -99,7 +102,7 @@ export default function AuthBackground() {
             ctx.beginPath()
             ctx.moveTo(a.x, a.y)
             ctx.lineTo(b.x, b.y)
-            ctx.strokeStyle = `rgba(124,111,247,${(1 - dist / MAX_DIST) * 0.2 * boost})`
+            ctx.strokeStyle = `rgba(${strokeRGB}, ${(1 - dist / MAX_DIST) * 0.2 * boost})`
             ctx.lineWidth   = 0.8
             ctx.stroke()
           }
@@ -110,7 +113,6 @@ export default function AuthBackground() {
     }
     loop()
 
-    /* ── Cleanup ── */
     return () => {
       window.removeEventListener("resize", resize)
       window.removeEventListener("mousemove", onMove)
@@ -121,9 +123,24 @@ export default function AuthBackground() {
 
   return (
     <>
-      <canvas ref={canvasRef} id="bg-canvas" />
-      <div    ref={glowRef}   id="cursor-glow" />
+      <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 1, pointerEvents: "none" }} />
+      <div 
+        ref={glowRef} 
+        style={{
+          width: "500px",
+          height: "500px",
+          position: "fixed",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          zIndex: 2,
+          transform: "translate(-50%, -50%)",
+          willChange: "left, top",
+          mixBlendMode: "screen",
+          background: "radial-gradient(circle, rgba(167, 139, 250, 0.11) 0%, rgba(167, 139, 250, 0.11) 25%, rgba(124, 111, 247, 0.03) 45%, transparent 65%)",
+          opacity: 0.85, 
+          filter: "blur(6px)"
+        }}
+      />
     </>
   )
 }
-

@@ -147,7 +147,6 @@ def train_churn_model():
     ]
     missing = [c for c in required_cols if c not in df.columns]
 
-<<<<<<< HEAD
     missing = [c for c in required_cols if c not in df.columns]
 
     if missing:
@@ -158,14 +157,6 @@ def train_churn_model():
             "recall": 0,
             "f1": 0
         }
-=======
-    if missing:
-        # Dataset doesn't have the RF columns – skip training, keep metrics at 0.
-        print("RF training skipped – missing columns:", missing)
-        _model_metrics = {"accuracy": 0, "precision": 0, "recall": 0, "f1": 0}
-        # FIX: do NOT set _rf_model; leave it None so predict_customer
-        # falls back to the cluster-based risk instead of crashing.
->>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
         return
 
     # ── All required columns present: train the model ────────────────────────
@@ -242,11 +233,7 @@ def predict_customer(
 
     segment_risk = assign_churn_risk(cluster, cluster_stats)
 
-<<<<<<< HEAD
     # Default: use the cluster-based risk label
-=======
-    # Default prediction comes from the cluster-based risk.
->>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
     churn_prediction = segment_risk["risk"]
     confidence = None
 
@@ -254,7 +241,6 @@ def predict_customer(
     train_churn_model()
 
     if _rf_model is not None:
-<<<<<<< HEAD
         features = [[
             age,
             income,
@@ -287,32 +273,6 @@ def predict_customer(
             float(max(probs) * 100),
             1
         )
-=======
-        # FIX: `input_features` renamed to avoid any collision with imports.
-        input_features = [[
-            age, income, spending,
-            visit_frequency, satisfaction_score,
-            complaints_count, loyalty_points,
-        ]]
-
-        pred = _rf_model.predict(input_features)[0]
-        churn_prediction = _rf_label_encoder.inverse_transform([pred])[0]
-
-        # Normalise RF label strings to UI labels
-        label_map = {"High": "High Risk", "Medium": "Medium Risk", "Low": "Low Risk"}
-        churn_prediction = label_map.get(churn_prediction, churn_prediction)
-
-        probs = _rf_model.predict_proba(input_features)[0]
-        confidence = round(float(max(probs) * 100), 1)
-
-        print("Classes:",      _rf_label_encoder.classes_)
-        print("Prediction:",   churn_prediction)
-        print("Probabilities:", probs)
-        print("Features:",     input_features)
-
-    # FIX: label normalisation now only runs when RF is used (above).
-    # When falling back to segment risk the label is already in UI format.
->>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
     # ── Step 3: build response ───────────────────────────────────────────────
     recommendations = {

@@ -22,7 +22,6 @@ export default function Login({ onLogin, switchToSignup }) {
     document.documentElement.setAttribute("data-theme", next)
   }
 
-<<<<<<< HEAD
   const handleLogin = async () => {
       if (!email.trim() || !password.trim()) {
     setError('Email and password are required.')
@@ -46,29 +45,6 @@ export default function Login({ onLogin, switchToSignup }) {
     } finally {
       setLoading(false)
     }
-=======
-  /* ── Your existing login logic — untouched ── */
- const handleLogin = async () => {
-  try {
-    setLoading(true)
-    setError("")
-
-    const res = await axios.post(
-      "https://customeriq-backend.onrender.com/auth/login",
-      {
-        email,
-        password,
-      }
-    )
-
-    localStorage.setItem("token", res.data.access_token)
-
-    onLogin()
-  } catch (err) {
-    setError(err?.response?.data?.detail || "Login failed")
-  } finally {
-    setLoading(false)
->>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
   }
 }
 

@@ -1,6 +1,10 @@
 import axios from 'axios'
 
+<<<<<<< HEAD
 const BASE = "https://customeriq-backend.onrender.com"
+=======
+const BASE = "https://customeriq-backend.onrender.com";
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 export const api = {
   // Dataset

@@ -18,10 +18,30 @@ from auth import (
 
 app = FastAPI(title="Mall Churn Prediction API", version="2.0.0")
 
+<<<<<<< HEAD
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
+=======
+# FIX: allow_origins=["*"] is rejected by browsers when allow_credentials=True.
+# Specify the actual frontend origin(s) instead.
+# Add every URL your frontend runs on (local dev + production).
+ALLOWED_ORIGINS = [
+    "https://customeriq-mdbl.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    # Add your deployed frontend URL here, e.g.:
+    # "https://your-app.vercel.app",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -52,6 +72,7 @@ class LoginRequest(BaseModel):
 
 @app.post("/auth/signup")
 def signup(req: SignupRequest):
+<<<<<<< HEAD
     # Validation
     if not req.username or not req.email or not req.password:
         raise HTTPException(status_code=400, detail="All fields are required.")
@@ -70,16 +91,31 @@ def signup(req: SignupRequest):
     user = {
         "username":      req.username.strip(),
         "email":         req.email.lower().strip(),
+=======
+    existing_user = users_collection.find_one({"email": req.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = hash_password(req.password)
+    user = {
+        "username":      req.username,
+        "email":         req.email,
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
         "password_hash": hashed_password,
     }
     users_collection.insert_one(user)
 
     token = create_access_token({"email": req.email, "username": req.username})
+<<<<<<< HEAD
     return {"message": "Signup successful", "access_token": token, "token": token, "token_type": "bearer"}
+=======
+    return {"message": "Signup successful", "access_token": token, "token_type": "bearer"}
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 
 @app.post("/auth/login")
 def login(req: LoginRequest):
+<<<<<<< HEAD
     # Validation
     if not req.email or not req.password:
         raise HTTPException(status_code=400, detail="Email and password are required.")
@@ -98,6 +134,18 @@ def login(req: LoginRequest):
 
     token = create_access_token({"email": user["email"], "username": user["username"]})
     return {"message": "Login successful", "access_token": token, "token": token, "token_type": "bearer"}
+=======
+    user = users_collection.find_one({"email": req.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    valid = verify_password(req.password, user["password_hash"])
+    if not valid:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token = create_access_token({"email": user["email"], "username": user["username"]})
+    return {"message": "Login successful", "access_token": token, "token_type": "bearer"}
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 
 @app.get("/auth/me")
@@ -272,4 +320,8 @@ def predict(req: PredictRequest):
 
 @app.get("/metrics")
 def metrics():
+<<<<<<< HEAD
     return get_model_metrics()
+=======
+    return get_model_metrics()
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c

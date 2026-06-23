@@ -1,7 +1,9 @@
+import io
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+<<<<<<< HEAD
 # ── Default (hardcoded) dataset path ──────────────────────────────────────────
 CSV_PATH = "Mall_Customers.csv"
 
@@ -13,46 +15,124 @@ _uploaded: dict = {}
 
 def has_upload() -> bool:
     return bool(_uploaded)
+=======
+from database import db  # reuse the existing MongoDB connection
+
+# ── MongoDB collection for persisted uploads ──────────────────────────────────
+_uploads_col = db["uploaded_dataset"]
+
+# ── Default (hardcoded) dataset path ──────────────────────────────────────────
+CSV_PATH = "Mall_Customers.csv"
+
+# ── In-memory cache (populated from MongoDB on first access) ──────────────────
+_uploaded: dict = {}
+
+
+def _load_from_mongo() -> bool:
+    """Pull the latest upload from MongoDB into the in-memory cache."""
+    global _uploaded
+    doc = _uploads_col.find_one({}, sort=[("_id", -1)])  # most recent
+    if not doc:
+        return False
+    try:
+        df = pd.read_csv(io.BytesIO(doc["csv_bytes"]))
+        _uploaded = {
+            "df":        df,
+            "col_map":   doc["col_map"],
+            "filename":  doc["filename"],
+            "row_count": len(df),
+        }
+        return True
+    except Exception as e:
+        print(f"[data_loader] Failed to restore upload from MongoDB: {e}")
+        return False
+
+
+def has_upload() -> bool:
+    if _uploaded:
+        return True
+    return _load_from_mongo()
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 
 def get_upload_info() -> dict:
     if not _uploaded:
+        _load_from_mongo()
+    if not _uploaded:
         return {}
     return {
-        "filename": _uploaded.get("filename", ""),
+        "filename":  _uploaded.get("filename", ""),
         "row_count": _uploaded.get("row_count", 0),
-        "col_map": _uploaded.get("col_map", {}),
+        "col_map":   _uploaded.get("col_map", {}),
     }
 
 
 def store_upload(df: pd.DataFrame, col_map: dict, filename: str):
-    """Persist an uploaded dataframe + column mapping in memory."""
-    _uploaded.clear()
-    _uploaded["df"] = df
-    _uploaded["col_map"] = col_map
-    _uploaded["filename"] = filename
-    _uploaded["row_count"] = len(df)
-    # Also clear the clustering cache so next call re-runs on new data
+    """Persist an uploaded dataframe + column mapping to MongoDB and memory."""
+    global _uploaded
+
+    # Serialise DataFrame to CSV bytes for MongoDB storage
+    buf = io.BytesIO()
+    df.to_csv(buf, index=False)
+    csv_bytes = buf.getvalue()
+
+    # Upsert a single document (we only ever keep one active upload)
+    _uploads_col.delete_many({})
+    _uploads_col.insert_one({
+        "csv_bytes": csv_bytes,
+        "col_map":   col_map,
+        "filename":  filename,
+    })
+
+    # Update in-memory cache
+    _uploaded = {
+        "df":        df,
+        "col_map":   col_map,
+        "filename":  filename,
+        "row_count": len(df),
+    }
+
+    # Clear clustering cache so next call re-runs on new data
     import model as _m
     _m._cache.clear()
+<<<<<<< HEAD
     # FIX: also reset the fitted KMeans so it is re-trained on new data
     _m._fitted_km.clear()
+=======
+    _m._fitted_km.clear()
+    _m._rf_model = None          # force RF re-train on new dataset
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 
 def clear_upload():
+    global _uploaded
+    _uploads_col.delete_many({})
     _uploaded.clear()
     import model as _m
     _m._cache.clear()
     _m._fitted_km.clear()
+<<<<<<< HEAD
 
 
 # ── Load data (uploaded takes priority over hardcoded) ────────────────────────
+=======
+    _m._rf_model = None
+
+
+# ── Load data (uploaded takes priority over default CSV) ──────────────────────
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 def load_data() -> pd.DataFrame:
+    if not _uploaded:
+        _load_from_mongo()
+
     if _uploaded:
         df = _uploaded["df"].copy()
         cm = _uploaded["col_map"]
 
+<<<<<<< HEAD
         # Normalise column names to the standard set
+=======
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
         rename = {}
         if cm.get("id"):       rename[cm["id"]]       = "CustomerID"
         if cm.get("gender"):   rename[cm["gender"]]   = "Gender"
@@ -61,14 +141,20 @@ def load_data() -> pd.DataFrame:
         if cm.get("spending"): rename[cm["spending"]] = "SpendingScore"
         df = df.rename(columns=rename)
 
+<<<<<<< HEAD
         # FIX: guarantee every expected column exists so downstream code
         # never hits a KeyError regardless of what the user mapped.
+=======
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
         if "Gender" not in df.columns:
             df["Gender"] = "Unknown"
         if "CustomerID" not in df.columns:
             df["CustomerID"] = range(1, len(df) + 1)
         if "Age" not in df.columns:
+<<<<<<< HEAD
             # Use a neutral default (median-like) so cluster stats don't crash
+=======
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
             df["Age"] = 30
 
         return df
@@ -79,12 +165,18 @@ def load_data() -> pd.DataFrame:
 
 
 # ── Pre-process for K-Means ───────────────────────────────────────────────────
+<<<<<<< HEAD
 # Only AnnualIncome + SpendingScore are used for clustering.
 # Age and Gender are kept in the DataFrame for display purposes only.
 def preprocess(df: pd.DataFrame):
     df = df.copy()
 
     # FIX: validate required columns exist before trying to use them
+=======
+def preprocess(df: pd.DataFrame):
+    df = df.copy()
+
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
     missing = [c for c in ["AnnualIncome", "SpendingScore"] if c not in df.columns]
     if missing:
         raise ValueError(
@@ -103,9 +195,17 @@ def assign_churn_risk(cluster_id: int, cluster_stats: dict) -> dict:
     stats = cluster_stats[cluster_id]
     spending = stats["avg_spending"]
 
+<<<<<<< HEAD
     if spending < 35:
+=======
+    if spending < 20:
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
         return {"risk": "High Risk",   "level": 3, "color": "#EF4444", "badge": "🔴"}
-    elif spending < 55:
+    elif spending < 60:
         return {"risk": "Medium Risk", "level": 2, "color": "#F59E0B", "badge": "🟡"}
     else:
+<<<<<<< HEAD
         return {"risk": "Low Risk",    "level": 1, "color": "#10B981", "badge": "🟢"}
+=======
+        return {"risk": "Low Risk",    "level": 1, "color": "#10B981", "badge": "🟢"}
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c

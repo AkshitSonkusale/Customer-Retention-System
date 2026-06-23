@@ -33,6 +33,7 @@ export default function Signup({ switchToLogin }) {
   const strength = scorePassword(password)
 
   const handleSignup = async () => {
+<<<<<<< HEAD
     // Validation
     if (!username.trim() || !email.trim() || !password.trim()) {
       setError('All fields are required.')
@@ -61,7 +62,28 @@ export default function Signup({ switchToLogin }) {
     } finally {
       setLoading(false)
     }
+=======
+  try {
+    setLoading(true)
+    setError("")
+
+    await axios.post(
+      "https://customeriq-backend.onrender.com/auth/signup",
+      {
+        username,
+        email,
+        password,
+      }
+    )
+
+    switchToLogin()
+  } catch (err) {
+    setError(err?.response?.data?.detail || "Signup failed")
+  } finally {
+    setLoading(false)
+>>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
   }
+}
 
   const onKey = e => e.key === "Enter" && handleSignup()
 

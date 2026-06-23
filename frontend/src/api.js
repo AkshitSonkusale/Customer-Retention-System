@@ -1,23 +1,19 @@
 import axios from 'axios'
 
-<<<<<<< HEAD
 const BASE = "https://customeriq-backend.onrender.com"
-=======
-const BASE = "https://customeriq-backend.onrender.com";
->>>>>>> 9e9cf08259ea7c9b7d412aeda843930c0060b28c
 
 export const api = {
   // Dataset
-  datasetInfo:   ()                  => axios.get(`${BASE}/dataset/info`).then(r => r.data),
-  resetDataset:  ()                  => axios.delete(`${BASE}/dataset`).then(r => r.data),
+  datasetInfo:   ()               => axios.get(`${BASE}/dataset/info`).then(r => r.data),
+  resetDataset:  ()               => axios.delete(`${BASE}/dataset`).then(r => r.data),
 
   // Upload flow (two-step)
-  uploadCSV:     (file)              => {
+  uploadCSV:     (file)           => {
     const fd = new FormData()
     fd.append('file', file)
     return axios.post(`${BASE}/upload`, fd).then(r => r.data)
   },
-  confirmUpload: (token, col_map)    => axios.post(`${BASE}/upload/confirm`, { token, col_map }).then(r => r.data),
+  confirmUpload: (token, col_map) => axios.post(`${BASE}/upload/confirm`, { token, col_map }).then(r => r.data),
 
   // Analysis
   elbow:    (maxK = 10) => axios.get(`${BASE}/elbow?max_k=${maxK}`).then(r => r.data),
@@ -25,7 +21,5 @@ export const api = {
   summary:  (k = 5)     => axios.get(`${BASE}/summary?k=${k}`).then(r => r.data),
   customers:(k = 5)     => axios.get(`${BASE}/customers?k=${k}`).then(r => r.data),
   predict:  (data)      => axios.post(`${BASE}/predict`, data).then(r => r.data),
-
-  // NEW
   metrics:  ()          => axios.get(`${BASE}/metrics`).then(r => r.data),
 }

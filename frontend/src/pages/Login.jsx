@@ -231,10 +231,19 @@ export default function Login({ onLogin, switchToSignup }) {
               Precision analytics for automated customer retention.
             </p>
           </div>
-          <div style={{ display: "flex", gap: 24, fontSize: 12, color: "var(--text2)", fontWeight: 700 }}>
-            <span>support@customeriq.internal</span>
-            <span>+1 (555) 839-2091</span>
-          </div>
+         <div style={{ display: "flex", gap: 24, fontSize: 12, color: "var(--text2)", fontWeight: 700, alignItems: "center" }}>
+  <span>support@customeriq.internal</span>
+  <a 
+    href="https://github.com/AkshitSonkusale/Mall-Customer-Churn-Prediction-System" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{ color: "var(--accent2)", fontWeight: 800, textDecoration: "none", border: "2px solid var(--accent)", padding: "4px 12px", textTransform: "uppercase", letterSpacing: 1, fontSize: 11, transition: "all 0.12s" }}
+    onMouseEnter={e => { e.target.style.background = "var(--accent)"; e.target.style.color = "#fff" }}
+    onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.color = "var(--accent2)" }}
+  >
+    ⭐ GitHub Repo
+  </a>
+</div>
         </div>
       </footer>
     </div>

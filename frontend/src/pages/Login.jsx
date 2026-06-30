@@ -2,6 +2,7 @@ import { useState, useRef } from "react"
 import { Mail, Lock, Eye, EyeOff, Info, MessageSquare, Layers, Activity, Cpu, Sun, Moon, ExternalLink, ShieldCheck } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
+import PixelLogo from "../components/PixelLogo"
 
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
@@ -66,8 +67,8 @@ export default function Login({ onLogin, switchToSignup }) {
 
       {/* Header */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, height: 64, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 28px", zIndex: 1000, background: "var(--bg)", borderBottom: "2px solid rgba(255,255,255,0.55)" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, background: 'var(--accent)', border: '2px solid rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: 14 }}>Ω</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <PixelLogo size={8} gap={2} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
         </div>
 
@@ -93,17 +94,12 @@ export default function Login({ onLogin, switchToSignup }) {
 
           {/* Left — branding */}
           <section style={{ flex: "1 1 420px", maxWidth: 480, minWidth: 320 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-              <div style={{ width: 50, height: 50, border: "2px solid rgba(255,255,255,0.55)", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: '4px 4px 0px rgba(0,0,0,0.8)' }}>Ω</div>
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 30, textTransform: "uppercase", letterSpacing: 4 }}>CustomerIQ</span>
-            </div>
-
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 400, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 64, fontWeight: 400, lineHeight: 1.02, textTransform: "uppercase", letterSpacing: 2, marginBottom: 20 }}>
               Understand your<br/>
               <span style={{ color: "var(--accent2)" }}>customers deeply.</span>
             </h1>
 
-            <p style={{ fontSize: 13, color: "var(--text2)", fontWeight: 600, marginBottom: 24, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 16, color: "var(--text2)", fontWeight: 500, marginBottom: 28, lineHeight: 1.6, maxWidth: 420 }}>
               ML-powered segmentation, churn prediction, and lifetime value modeling — all in one unified intelligence platform.
             </p>
 
@@ -180,6 +176,11 @@ export default function Login({ onLogin, switchToSignup }) {
                 <button type="button" className="switch-link" onClick={switchToSignup}>Create one free</button>
               </p>
             </div>
+
+            <p style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 10, color: "var(--text3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              <ShieldCheck size={13} style={{ color: "var(--low)" }} />
+              Protected by industry-standard encryption
+            </p>
           </section>
         </div>
       </div>
@@ -233,11 +234,6 @@ export default function Login({ onLogin, switchToSignup }) {
             >
               <ExternalLink size={14} /> GitHub Repo
             </a>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: "var(--text3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
-              <ShieldCheck size={13} style={{ color: "var(--low)" }} />
-              Protected by industry-standard encryption
-            </div>
           </div>
         </div>
       </footer>

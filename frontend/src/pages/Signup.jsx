@@ -2,6 +2,7 @@ import { useState } from "react"
 import { User, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
+import PixelLogo from "../components/PixelLogo"
 
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
@@ -90,9 +91,9 @@ export default function Signup({ switchToLogin }) {
 
           {/* Left — branding */}
           <section style={{ flex: "1 1 420px", maxWidth: 500, minWidth: 320 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-              <div style={{ width: 50, height: 50, border: "2px solid rgba(255,255,255,0.55)", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: '4px 4px 0px rgba(0,0,0,0.8)' }}>Ω</div>
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 30, textTransform: "uppercase", letterSpacing: 4 }}>CustomerIQ</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+              <PixelLogo size={10} gap={2.5} />
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 26, textTransform: "uppercase", letterSpacing: 4 }}>CustomerIQ</span>
             </div>
 
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 400, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>

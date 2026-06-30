@@ -29,8 +29,8 @@ const pickFlicker = (row, col) => FLICKER_VARIANTS[(row * 3 + col) % FLICKER_VAR
 
 export default function PixelLogo({ size = 16, gap = 4, style = {} }) {
   const cellC = size
-  const cellI = Math.round(size * 0.8)
-  const gapI  = Math.max(2, Math.round(gap * 0.75))
+  const cellI = Math.round(size * 0.92)
+  const gapI  = Math.max(2, Math.round(gap * 0.8))
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: size * 0.85, ...style }}>

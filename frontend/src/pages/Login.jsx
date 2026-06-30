@@ -66,25 +66,23 @@ export default function Login({ onLogin, switchToSignup }) {
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", position: "relative" }}>
 
       {/* Header */}
-      <header style={{ position: "fixed", top: 0, left: 0, right: 0, height: 64, zIndex: 1000, background: "var(--bg)", borderBottom: "2px solid rgba(255,255,255,0.55)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 32px" }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <PixelLogo size={6} gap={1.5} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 19, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
-          </div>
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, height: 64, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 28px", zIndex: 1000, background: "var(--bg)", borderBottom: "2px solid rgba(255,255,255,0.55)" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <PixelLogo size={5} gap={1.3} iWidthScale={1.4} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 19, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
+        </div>
 
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <button onClick={() => aboutRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px" }}>
-              <Info size={13} /> About
-            </button>
-            <button onClick={() => contactRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px" }}>
-              <MessageSquare size={13} /> Contact
-            </button>
-            <button onClick={toggleTheme} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px" }}>
-              {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
-              {theme === "dark" ? "Light" : "Dark"}
-            </button>
-          </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => aboutRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Info size={13} /> About
+          </button>
+          <button onClick={() => contactRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <MessageSquare size={13} /> Contact
+          </button>
+          <button onClick={toggleTheme} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
         </div>
       </header>
 

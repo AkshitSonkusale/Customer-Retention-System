@@ -72,7 +72,7 @@ export default function App() {
         {/* Logo — hidden on mobile via CSS */}
         <div className="sidebar-logo">
           <div style={{ marginBottom: 10 }}>
-            <PixelLogo size={6} gap={1.5} />
+            <PixelLogo size={7} gap={2} />
           </div>
           <h1>CustomerIQ</h1>
           <span>Churn Intelligence</span>

@@ -27,10 +27,11 @@ const I_GRID = [
 const FLICKER_VARIANTS = ['f1', 'f2', 'f3']
 const pickFlicker = (row, col) => FLICKER_VARIANTS[(row * 3 + col) % FLICKER_VARIANTS.length]
 
-export default function PixelLogo({ size = 16, gap = 4, style = {} }) {
-  const cellC = size
-  const cellI = Math.round(size * 0.92)
-  const gapI  = Math.max(2, Math.round(gap * 0.8))
+export default function PixelLogo({ size = 16, gap = 4, iWidthScale = 1, style = {} }) {
+  const cellC  = size
+  const cellI  = Math.round(size * 0.8)
+  const cellIW = Math.round(cellI * iWidthScale)
+  const gapI   = Math.max(2, Math.round(gap * 0.75))
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: size * 0.85, ...style }}>
@@ -63,14 +64,14 @@ export default function PixelLogo({ size = 16, gap = 4, style = {} }) {
       </div>
 
       {/* i */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(2, ${cellI}px)`, gap: gapI, marginBottom: Math.round(size * 0.25) }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(2, ${cellIW}px)`, gap: gapI, marginBottom: Math.round(size * 0.25) }}>
         {I_GRID.flatMap((row, r) =>
           row.map((lit, c) => (
             <div
               key={`i-${r}-${c}`}
               className={lit ? `pixel-lit ${pickFlicker(r + 2, c)}` : ''}
               style={{
-                width: cellI,
+                width: cellIW,
                 height: cellI,
                 borderRadius: 2,
                 background: lit ? 'var(--accent)' : 'var(--bg3)',

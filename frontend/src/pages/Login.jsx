@@ -1,9 +1,9 @@
 import { useState, useRef } from "react"
-import { Mail, Lock, Eye, EyeOff, Info, MessageSquare, Layers, Activity, Cpu, Sun, Moon } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, Info, MessageSquare, Layers, Activity, Cpu, Sun, Moon, ExternalLink, ShieldCheck } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
 
-const BASE = import.meta.env.VITE_API_URL || "https://customeriq-backend.onrender.com"
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export default function Login({ onLogin, switchToSignup }) {
   const [email,    setEmail]    = useState("")
@@ -23,21 +23,8 @@ export default function Login({ onLogin, switchToSignup }) {
   }
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      setError('Email and password are required.')
-      return
-    }
-    if (!email.includes('@')) {
-      setError('Enter a valid email address.')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
-    }
     try {
-      setLoading(true)
-      setError("")
+      setLoading(true); setError("")
       const res = await axios.post(`${BASE}/auth/login`, { email, password })
       localStorage.setItem("token", res.data.token || res.data.access_token)
       onLogin()
@@ -51,6 +38,7 @@ export default function Login({ onLogin, switchToSignup }) {
   const onKey = e => e.key === "Enter" && handleLogin()
 
   const inputStyle = {
+    paddingLeft: 40,
     background: 'var(--bg)',
     border: '2px solid rgba(255,255,255,0.55)',
     padding: '11px 12px 11px 40px',
@@ -82,6 +70,7 @@ export default function Login({ onLogin, switchToSignup }) {
           <div style={{ width: 32, height: 32, background: 'var(--accent)', border: '2px solid rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: 14 }}>Ω</div>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, textTransform: 'uppercase' }}>CustomerIQ</span>
         </div>
+
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => aboutRef.current?.scrollIntoView({ behavior: "smooth" })} className="k-btn" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Info size={13} /> About
@@ -99,6 +88,7 @@ export default function Login({ onLogin, switchToSignup }) {
       {/* Main split */}
       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "140px 24px 80px", boxSizing: "border-box", position: "relative", zIndex: 10 }}>
         <AuthBackground />
+
         <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 64, width: "100%", maxWidth: 1040 }}>
 
           {/* Left — branding */}
@@ -150,7 +140,7 @@ export default function Login({ onLogin, switchToSignup }) {
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Mail size={15} /></span>
                   <input style={inputStyle} type="email" placeholder="you@company.com"
                     value={email} onChange={e => setEmail(e.target.value)} onKeyDown={onKey}
-                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='3px 3px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
+                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='2px 2px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
                     onBlur={e => { e.target.style.borderColor='rgba(255,255,255,0.55)'; e.target.style.boxShadow='none'; e.target.style.transform='none' }}
                   />
                 </div>
@@ -165,7 +155,7 @@ export default function Login({ onLogin, switchToSignup }) {
                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Lock size={15} /></span>
                   <input style={inputStyle} type={showPass ? "text" : "password"} placeholder="••••••••"
                     value={password} onChange={e => setPassword(e.target.value)} onKeyDown={onKey}
-                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='3px 3px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
+                    onFocus={e => { e.target.style.borderColor='var(--accent)'; e.target.style.boxShadow='2px 2px 0px var(--accent)'; e.target.style.transform='translate(-1px,-1px)' }}
                     onBlur={e => { e.target.style.borderColor='rgba(255,255,255,0.55)'; e.target.style.boxShadow='none'; e.target.style.transform='none' }}
                   />
                   <button type="button" onClick={() => setShowPass(v => !v)}
@@ -222,7 +212,7 @@ export default function Login({ onLogin, switchToSignup }) {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer / Contact */}
       <footer ref={contactRef} style={{ background: "var(--bg2)", borderTop: "2px solid rgba(255,255,255,0.55)", padding: "48px 24px", position: "relative", zIndex: 10 }}>
         <div style={{ maxWidth: 1040, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
           <div>
@@ -231,19 +221,24 @@ export default function Login({ onLogin, switchToSignup }) {
               Precision analytics for automated customer retention.
             </p>
           </div>
-         <div style={{ display: "flex", gap: 24, fontSize: 12, color: "var(--text2)", fontWeight: 700, alignItems: "center" }}>
-  <span>support@customeriq.internal</span>
-  <a 
-    href="https://github.com/AkshitSonkusale/Mall-Customer-Churn-Prediction-System" 
-    target="_blank" 
-    rel="noopener noreferrer"
-    style={{ color: "var(--accent2)", fontWeight: 800, textDecoration: "none", border: "2px solid var(--accent)", padding: "4px 12px", textTransform: "uppercase", letterSpacing: 1, fontSize: 11, transition: "all 0.12s" }}
-    onMouseEnter={e => { e.target.style.background = "var(--accent)"; e.target.style.color = "#fff" }}
-    onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.color = "var(--accent2)" }}
-  >
-    ⭐ GitHub Repo
-  </a>
-</div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            <a
+              href="https://github.com/AkshitSonkusale/Mall-Customer-Churn-Prediction-System"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--accent2)", fontWeight: 800, textDecoration: "none", border: "2px solid var(--accent)", padding: "6px 14px", textTransform: "uppercase", letterSpacing: 1, fontSize: 11, transition: "all 0.12s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--accent)"; e.currentTarget.style.color = "#fff" }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--accent2)" }}
+            >
+              <ExternalLink size={14} /> GitHub Repo
+            </a>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: "var(--text3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              <ShieldCheck size={13} style={{ color: "var(--low)" }} />
+              Protected by industry-standard encryption
+            </div>
+          </div>
         </div>
       </footer>
     </div>

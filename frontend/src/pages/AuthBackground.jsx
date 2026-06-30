@@ -43,8 +43,9 @@ export default function AuthBackground() {
     const COUNT      = 100
     const MAX_DIST   = 130
     const MOUSE_RAD  = 175
-    const DARK_HUES  = [245, 250, 260, 165]
-    const LIGHT_HUES = [20, 25, 32, 15]
+    // Terracotta / warm amber hues (HSL hue degrees)
+    const DARK_HUES  = [18, 28, 35, 12]
+    const LIGHT_HUES = [16, 24, 30, 10]
 
     class Particle {
       constructor() { this.reset(true) }
@@ -74,9 +75,9 @@ export default function AuthBackground() {
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
         if (isLightTheme()) {
-          ctx.fillStyle = `hsla(${this.hue}, 95%, 50%, ${this.alpha * 0.75})`
+          ctx.fillStyle = `hsla(${this.hue}, 75%, 48%, ${this.alpha * 0.75})`
         } else {
-          ctx.fillStyle = `hsla(${this.hue}, 70%, 70%, ${this.alpha})`
+          ctx.fillStyle = `hsla(${this.hue}, 65%, 62%, ${this.alpha})`
         }
         ctx.fill()
       }
@@ -88,7 +89,8 @@ export default function AuthBackground() {
     const loop = () => {
       ctx.clearRect(0, 0, W, H)
       const lightActive = isLightTheme()
-      const strokeRGB = lightActive ? "234, 88, 12" : "124, 111, 247"
+      // Terracotta accent — rgb(217, 119, 87)
+      const strokeRGB = lightActive ? "184, 84, 56" : "217, 119, 87"
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -124,8 +126,8 @@ export default function AuthBackground() {
   return (
     <>
       <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 1, pointerEvents: "none" }} />
-      <div 
-        ref={glowRef} 
+      <div
+        ref={glowRef}
         style={{
           width: "500px",
           height: "500px",
@@ -136,8 +138,8 @@ export default function AuthBackground() {
           transform: "translate(-50%, -50%)",
           willChange: "left, top",
           mixBlendMode: "screen",
-          background: "radial-gradient(circle, rgba(167, 139, 250, 0.11) 0%, rgba(167, 139, 250, 0.11) 25%, rgba(124, 111, 247, 0.03) 45%, transparent 65%)",
-          opacity: 0.85, 
+          background: "radial-gradient(circle, rgba(217, 119, 87, 0.11) 0%, rgba(217, 119, 87, 0.11) 25%, rgba(232, 154, 124, 0.03) 45%, transparent 65%)",
+          opacity: 0.85,
           filter: "blur(6px)"
         }}
       />

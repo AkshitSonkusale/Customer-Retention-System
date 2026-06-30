@@ -3,22 +3,22 @@ import { User, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import axios from "axios"
 import AuthBackground from "./AuthBackground"
 
-const BASE = import.meta.env.VITE_API_URL || "https://customeriq-backend.onrender.com"
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 function scorePassword(pw) {
   if (!pw) return { level: 0, label: "", color: "" }
   let s = 0
-  if (pw.length >= 8)                        s++
-  if (pw.length >= 12)                       s++
+  if (pw.length >= 8)               s++
+  if (pw.length >= 12)              s++
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++
-  if (/\d/.test(pw))                         s++
-  if (/[^a-zA-Z0-9]/.test(pw))              s++
+  if (/\d/.test(pw))                s++
+  if (/[^a-zA-Z0-9]/.test(pw))     s++
   return [
-    { level: 0, label: "",       color: "" },
-    { level: 1, label: "Weak",   color: "var(--high)" },
-    { level: 2, label: "Fair",   color: "var(--med)" },
-    { level: 3, label: "Good",   color: "var(--low)" },
-    { level: 4, label: "Strong", color: "var(--accent2)" },
+    { level: 0, label: "",        color: "" },
+    { level: 1, label: "Weak",    color: "var(--high)" },
+    { level: 2, label: "Fair",    color: "var(--med)" },
+    { level: 3, label: "Good",    color: "var(--low)" },
+    { level: 4, label: "Strong",  color: "var(--accent2)" },
   ][Math.min(4, s)]
 }
 
@@ -33,21 +33,8 @@ export default function Signup({ switchToLogin }) {
   const strength = scorePassword(password)
 
   const handleSignup = async () => {
-    if (!username.trim() || !email.trim() || !password.trim()) {
-      setError('All fields are required.'); return
-    }
-    if (username.trim().length < 2) {
-      setError('Username must be at least 2 characters.'); return
-    }
-    if (!email.includes('@')) {
-      setError('Enter a valid email address.'); return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.'); return
-    }
     try {
-      setLoading(true)
-      setError("")
+      setLoading(true); setError("")
       await axios.post(`${BASE}/auth/signup`, { username, email, password })
       switchToLogin()
     } catch (err) {
@@ -62,9 +49,9 @@ export default function Signup({ switchToLogin }) {
   const inputStyle = {
     background: 'var(--bg)',
     border: '2px solid rgba(255,255,255,0.55)',
-    padding: '12px 12px 12px 40px',
+    padding: '11px 12px 11px 40px',
     color: 'var(--text)',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 600,
     fontFamily: 'var(--font-body)',
     outline: 'none',
@@ -78,20 +65,20 @@ export default function Signup({ switchToLogin }) {
     color: 'var(--text2)',
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    marginBottom: 8,
+    marginBottom: 6,
     display: 'block',
   }
 
   const onFocus = e => {
-    e.target.style.borderColor = 'var(--accent)'
-    e.target.style.boxShadow   = '3px 3px 0px var(--accent)'
-    e.target.style.transform   = 'translate(-1px,-1px)'
+    e.target.style.borderColor   = 'var(--accent)'
+    e.target.style.boxShadow     = '2px 2px 0px var(--accent)'
+    e.target.style.transform     = 'translate(-1px,-1px)'
   }
 
   const onBlur = e => {
-    e.target.style.borderColor = 'rgba(255,255,255,0.55)'
-    e.target.style.boxShadow   = 'none'
-    e.target.style.transform   = 'none'
+    e.target.style.borderColor   = 'rgba(255,255,255,0.55)'
+    e.target.style.boxShadow     = 'none'
+    e.target.style.transform     = 'none'
   }
 
   return (
@@ -101,7 +88,7 @@ export default function Signup({ switchToLogin }) {
       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "100px 24px 60px", boxSizing: "border-box", position: "relative", zIndex: 10 }}>
         <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start", gap: 64, width: "100%", maxWidth: 1040 }}>
 
-          {/* ── Left branding ── */}
+          {/* Left — branding */}
           <section style={{ flex: "1 1 420px", maxWidth: 500, minWidth: 320 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 50, height: 50, border: "2px solid rgba(255,255,255,0.55)", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: '4px 4px 0px rgba(0,0,0,0.8)' }}>Ω</div>
@@ -134,124 +121,87 @@ export default function Signup({ switchToLogin }) {
               </div>
               <div className="stat-divider" />
               <div className="stat-item">
-                <div className="stat-num">2K<span style={{ color: 'var(--accent)', fontSize: 16, fontFamily: 'var(--font-display)' }}>+</span></div>
+                <div className="stat-num">10K<span style={{ color: 'var(--accent)', fontSize: 16, fontFamily: 'var(--font-display)' }}>+</span></div>
                 <span className="stat-desc">Data Points</span>
               </div>
             </div>
           </section>
 
-          {/* ── Right form card ── */}
-          <section style={{ flex: "0 1 420px", minWidth: 340 }}>
-            <div className="auth-card" style={{ padding: 40, width: "100%", boxSizing: "border-box" }}>
-
-              {/* Header */}
-              <div style={{ marginBottom: 32 }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 400, textTransform: "uppercase", letterSpacing: 3 }}>
-                  Create Account
-                </h2>
-                <p style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginTop: 6 }}>
+          {/* Right — signup card */}
+          <section style={{ flex: "0 1 400px", minWidth: 340 }}>
+            <div className="auth-card" style={{ padding: 36, width: "100%", boxSizing: "border-box" }}>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 400, textTransform: "uppercase", letterSpacing: 3 }}>Create Account</h2>
+                <p style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 }}>
                   Start your CustomerIQ journey — it's free
                 </p>
               </div>
 
               {/* Username */}
-              <div style={{ marginBottom: 20 }}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Username</label>
                 <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}>
-                    <User size={15} />
-                  </span>
-                  <input
-                    style={inputStyle}
-                    placeholder="ada_lovelace"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    onKeyDown={onKey}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><User size={15} /></span>
+                  <input style={inputStyle} placeholder="ada_lovelace"
+                    value={username} onChange={e => setUsername(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
 
               {/* Email */}
-              <div style={{ marginBottom: 20 }}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Work Email</label>
                 <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}>
-                    <Mail size={15} />
-                  </span>
-                  <input
-                    style={inputStyle}
-                    type="email"
-                    placeholder="ada@company.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    onKeyDown={onKey}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Mail size={15} /></span>
+                  <input style={inputStyle} type="email" placeholder="ada@company.com"
+                    value={email} onChange={e => setEmail(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
 
               {/* Password */}
-              <div style={{ marginBottom: 24 }}>
+              <div className="form-group" style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>Password</label>
                 <div style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}>
-                    <Lock size={15} />
-                  </span>
-                  <input
-                    style={inputStyle}
-                    type={showPass ? "text" : "password"}
-                    placeholder="Min. 6 characters"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    onKeyDown={onKey}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(v => !v)}
-                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text3)" }}
-                  >
+                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }}><Lock size={15} /></span>
+                  <input style={inputStyle} type={showPass ? "text" : "password"} placeholder="Min. 8 characters"
+                    value={password} onChange={e => setPassword(e.target.value)}
+                    onKeyDown={onKey} onFocus={onFocus} onBlur={onBlur} />
+                  <button type="button" onClick={() => setShowPass(v => !v)}
+                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text3)" }}>
                     {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
 
                 {/* Password strength bar */}
                 {password && (
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                     <div style={{ flex: 1, height: 6, background: "var(--bg3)", border: "2px solid rgba(255,255,255,0.55)", position: "relative", overflow: "hidden" }}>
                       <div style={{ height: "100%", width: `${strength.level * 25}%`, background: strength.color, transition: "width 0.3s ease" }} />
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: strength.color, textTransform: "uppercase", letterSpacing: 1, minWidth: 44 }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: strength.color, textTransform: "uppercase", letterSpacing: 1, minWidth: 40 }}>
                       {strength.label}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Error */}
               {error && (
-                <div style={{ color: "var(--high)", fontWeight: 800, fontSize: 11, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1, border: "2px solid var(--high)", padding: "8px 12px" }}>
+                <div style={{ color: "var(--high)", fontWeight: 800, fontSize: 11, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1, border: "2px solid var(--high)", padding: "8px 12px" }}>
                   ⚠ {error}
                 </div>
               )}
 
-              {/* Submit */}
-              <button className="btn-primary" onClick={handleSignup} disabled={loading} style={{ marginTop: 4 }}>
+              <button className="btn-primary" onClick={handleSignup} disabled={loading}>
                 {loading ? "Creating account…" : "Create Account →"}
               </button>
 
-              {/* Switch to login */}
-              <p className="auth-switch" style={{ marginTop: 20 }}>
+              <p className="auth-switch" style={{ marginTop: 16 }}>
                 Already have an account?{" "}
                 <button type="button" className="switch-link" onClick={switchToLogin}>Sign in</button>
               </p>
             </div>
 
-            {/* Footer */}
             <p style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 10, color: "var(--text3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
               <ShieldCheck size={13} style={{ color: "var(--low)" }} />
               Protected by industry-standard encryption

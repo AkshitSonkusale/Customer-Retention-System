@@ -4,7 +4,7 @@ import axios from "axios"
 import AuthBackground from "./AuthBackground"
 import PixelLogo from "../components/PixelLogo"
 
-const BASE = import.meta.env.VITE_API_URL || "https://customeriq-backend.onrender.com"
+const BASE = "https://customeriq-backend.onrender.com"
 
 export default function Login({ onLogin, switchToSignup }) {
   const [email,    setEmail]    = useState("")

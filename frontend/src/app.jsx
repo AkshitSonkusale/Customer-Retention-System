@@ -7,14 +7,13 @@ import Login     from './pages/Login'
 import Signup    from './pages/Signup'
 import { api }   from './api'
 import PixelLogo from './components/PixelLogo'
-import { LogOut, Database, LayoutDashboard, Users, Target, Settings } from 'lucide-react'
+import { LogOut, Database, LayoutDashboard, Users, Target } from 'lucide-react'
 
 const NAV = [
   { id: 'upload',    label: 'Dataset',   Icon: Database        },
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { id: 'customers', label: 'Customers', Icon: Users           },
   { id: 'predict',   label: 'Predict',   Icon: Target          },
-  { id: 'settings',  label: 'Settings',  Icon: Settings        },
 ]
 
 export default function App() {
@@ -80,7 +79,7 @@ export default function App() {
 
         {/* Nav */}
         <nav className="sidebar-nav">
-          {NAV.filter(n => isMobile ? n.id !== 'settings' : true).map(({ id, label, Icon }) => (
+          {NAV.map(({ id, label, Icon }) => (
             <button key={id} className={`nav-item ${page === id ? 'active' : ''}`}
               onClick={() => setPage(id)}>
               <Icon size={isMobile ? 20 : 16} />
@@ -145,43 +144,11 @@ export default function App() {
       </aside>
 
       <main className="main">
-        {/* Mobile settings page */}
-        {page === 'settings' && isMobile && (
-          <div className="fade-in">
-            <div className="page-header">
-              <h2>Settings</h2>
-              <p>Dataset and cluster configuration</p>
-            </div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-title">Clusters (k)</div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-                {[3,4,5,6,7].map(n => (
-                  <button key={n} className={`k-btn ${k === n ? 'active' : ''}`}
-                    style={{ padding: '10px 18px', fontSize: 14 }}
-                    onClick={() => setK(n)}>{n}</button>
-                ))}
-              </div>
-            </div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-title">Active Dataset</div>
-              <div style={{ fontSize: 13, color: isDefault ? 'var(--text2)' : 'var(--accent2)', fontWeight: 700, marginBottom: 4 }}>
-                {dataset ? dataset.filename : '—'}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-                {dataset ? `${Number(dataset.rows).toLocaleString()} rows` : ''}
-                {isDefault ? ' · default' : ' · uploaded'}
-              </div>
-              {!isDefault && (
-                <button className="btn" style={{ marginTop: 12 }}
-                  onClick={async () => { await api.resetDataset(); handleDatasetReady(null) }}>
-                  ↩ Reset to Default Dataset
-                </button>
-              )}
-            </div>
-          </div>
-        )}
         {page === 'upload'    && <Upload    onDatasetReady={handleDatasetReady} currentDataset={isDefault ? null : dataset} />}
-        {page === 'dashboard' && <Dashboard k={k} />}
+        {page === 'dashboard' && (
+          <Dashboard k={k} setK={setK} isMobile={isMobile} dataset={dataset} isDefault={isDefault}
+            onResetDataset={async () => { await api.resetDataset(); handleDatasetReady(null) }} />
+        )}
         {page === 'customers' && <Customers k={k} />}
         {page === 'predict'   && <Predict />}
       </main>

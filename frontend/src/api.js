@@ -21,5 +21,6 @@ export const api = {
   summary:  (k = 5)     => axios.get(`${BASE}/summary?k=${k}`).then(r => r.data),
   customers:(k = 5)     => axios.get(`${BASE}/customers?k=${k}`).then(r => r.data),
   predict:  (data)      => axios.post(`${BASE}/predict`, data).then(r => r.data),
+  recommend:(data)      => axios.post(`${BASE}/recommend`, data).then(r => r.data),
   metrics:  ()          => axios.get(`${BASE}/metrics`).then(r => r.data),
 }

@@ -27,6 +27,10 @@ export default function Predict() {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
+  const [aiRec,     setAiRec]     = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError,   setAiError]   = useState('')
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const validate = () => {
@@ -41,6 +45,7 @@ export default function Predict() {
     const err = validate()
     if (err) { setError(err); return }
     setError(''); setLoading(true)
+    setAiRec(''); setAiError('')
     try {
       const res = await api.predict({
         age: Number(form.age), annualIncome: Number(form.annualIncome),
@@ -55,6 +60,29 @@ export default function Predict() {
       setError('Cannot connect to backend. Make sure API is running.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAiRecommend = async () => {
+    if (!result) return
+    setAiLoading(true); setAiError('')
+    try {
+      const res = await api.recommend({
+        age: Number(form.age), annualIncome: Number(form.annualIncome),
+        spendingScore: Number(form.spendingScore), gender: form.gender,
+        visitFrequency: Number(form.visitFrequency || 0),
+        satisfactionScore: Number(form.satisfactionScore || 5),
+        complaintsCount: Number(form.complaintsCount || 0),
+        loyaltyPoints: Number(form.loyaltyPoints || 0),
+        predictedChurnRisk: result.predictedChurnRisk,
+        cluster: result.cluster,
+        confidence: result.confidence,
+      })
+      setAiRec(res.recommendation)
+    } catch {
+      setAiError('AI recommendation unavailable right now.')
+    } finally {
+      setAiLoading(false)
     }
   }
 
@@ -142,6 +170,27 @@ export default function Predict() {
                   {info.tips.map((t, i) => (
                     <div key={i} style={{ fontSize: 11, fontWeight: 700, color: 'var(--text2)', marginTop: 4 }}>→ {t}</div>
                   ))}
+                </div>
+
+                <div style={{ marginTop: 12, textAlign: 'left' }}>
+                  {!aiRec && (
+                    <button className="btn" style={{ width: '100%' }} onClick={handleAiRecommend} disabled={aiLoading}>
+                      {aiLoading ? 'Thinking...' : '✨ Get AI Recommendation'}
+                    </button>
+                  )}
+                  {aiError && (
+                    <div style={{ color: 'var(--high)', fontWeight: 700, fontSize: 11, marginTop: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      ⚠ {aiError}
+                    </div>
+                  )}
+                  {aiRec && (
+                    <div style={{ background: 'var(--bg3)', border: '2px solid var(--accent2)', marginTop: 8, padding: 14, boxShadow: '3px 3px 0px var(--accent2)' }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent2)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                        ✨ AI Retention Strategy
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text2)', lineHeight: 1.6 }}>{aiRec}</div>
+                    </div>
+                  )}
                 </div>
               </div>
             )

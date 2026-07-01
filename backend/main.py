@@ -15,6 +15,7 @@ from auth import (
     create_access_token,
     get_current_user,
 )
+from ai_recommend import get_ai_recommendation
 
 app = FastAPI(title="Mall Churn Prediction API", version="2.0.0")
 
@@ -273,3 +274,27 @@ def predict(req: PredictRequest):
 @app.get("/metrics")
 def metrics():
     return get_model_metrics()
+
+
+class RecommendRequest(BaseModel):
+    age:               float
+    annualIncome:      float
+    spendingScore:     float
+    gender:            str   = "Unknown"
+    visitFrequency:    float = 0
+    satisfactionScore: float = 5
+    complaintsCount:   float = 0
+    loyaltyPoints:     float = 0
+    predictedChurnRisk: str
+    cluster:            int
+    confidence:          float | None = None
+
+
+@app.post("/recommend")
+def recommend(req: RecommendRequest):
+    profile = req.model_dump(exclude={"predictedChurnRisk", "cluster", "confidence"})
+    try:
+        text = get_ai_recommendation(profile, req.predictedChurnRisk, req.cluster, req.confidence)
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return {"recommendation": text}

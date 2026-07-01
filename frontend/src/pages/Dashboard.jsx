@@ -16,7 +16,7 @@ const KPI_CONFIG = [
   { key: 'sil',    label: 'Silhouette Score',  sub: 'Cluster quality',    color: 'var(--accent2)',border: '#7c6ff7' },
 ]
 
-export default function Dashboard({ k }) {
+export default function Dashboard({ k, setK, isMobile, dataset, isDefault, onResetDataset }) {
   const [summary,  setSummary]  = useState(null)
   const [scatter,  setScatter]  = useState([])
   const [elbow,    setElbow]    = useState([])
@@ -63,6 +63,32 @@ export default function Dashboard({ k }) {
         <h2>Churn Overview</h2>
         <p>K-Means · k={k} · {summary.totalCustomers.toLocaleString()} customers analysed</p>
       </div>
+
+      {/* Mobile-only cluster/dataset controls */}
+      {isMobile && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title">Clusters (k)</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+            {[3,4,5,6,7].map(n => (
+              <button key={n} className={`k-btn ${k === n ? 'active' : ''}`}
+                style={{ padding: '10px 18px', fontSize: 14 }}
+                onClick={() => setK(n)}>{n}</button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginTop: 12 }}>
+            Active Dataset
+          </div>
+          <div style={{ fontSize: 13, color: isDefault ? 'var(--text2)' : 'var(--accent2)', fontWeight: 700, marginTop: 2 }}>
+            {dataset ? dataset.filename : '—'}
+            {dataset ? ` · ${Number(dataset.rows).toLocaleString()} rows` : ''}
+          </div>
+          {!isDefault && (
+            <button className="btn" style={{ marginTop: 12 }} onClick={onResetDataset}>
+              ↩ Reset to Default Dataset
+            </button>
+          )}
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid-4" style={{ marginBottom: 20 }}>

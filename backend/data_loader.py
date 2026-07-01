@@ -1,15 +1,35 @@
 import io
+import os
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+from database import db
+
 # ── Default (hardcoded) dataset path ──────────────────────────────────────────
-CSV_PATH = "Mall_Customers.csv"
+# Absolute, so it resolves correctly regardless of the process's working directory.
+CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Mall_Customers.csv")
 
 # ── In-memory uploaded dataset store ─────────────────────────────────────────
 # When a user uploads a CSV this dict is populated.
 # { "df": pd.DataFrame, "col_map": {...}, "filename": str, "row_count": int }
 _uploaded: dict = {}
+_uploads_col = db["uploads"]
+
+
+def _load_from_mongo():
+    """Restore the active upload from MongoDB after a cold start (in-memory cache is empty)."""
+    global _uploaded
+    doc = _uploads_col.find_one()
+    if not doc:
+        return
+    df = pd.read_csv(io.BytesIO(doc["csv_bytes"]))
+    _uploaded = {
+        "df":        df,
+        "col_map":   doc["col_map"],
+        "filename":  doc["filename"],
+        "row_count": len(df),
+    }
 
 
 def has_upload() -> bool:

@@ -1,6 +1,6 @@
 # CustomerIQ – Mall Customer Churn Prediction & Segmentation System
 
-CustomerIQ is a full-stack Machine Learning web application that performs customer segmentation using K-Means Clustering and customer churn prediction using Random Forest Classification. Users can upload their own datasets, perform clustering analysis, visualize customer segments, and predict churn risk through an interactive dashboard.
+CustomerIQ is a full-stack Machine Learning web application that performs customer segmentation using K-Means Clustering and customer churn prediction using Random Forest Classification. Users can upload their own datasets, perform clustering analysis, visualize customer segments, predict churn risk, and generate AI-powered, profile-specific retention recommendations through an interactive dashboard.
 
 ## Features
 
@@ -18,6 +18,12 @@ CustomerIQ is a full-stack Machine Learning web application that performs custom
 - Confidence score generation
 - Personalized recommendations
 - Risk-level classification
+
+### AI Retention Recommendations
+- On-demand, LLM-generated retention strategy per customer (Groq — Llama 3.3 70B)
+- Reasons over the full profile (age, income, spending trend, complaints, loyalty points) instead of returning a generic templated offer
+- Kept as a separate, opt-in call so the core prediction endpoint stays fast and free
+- Falls back gracefully to the static recommendation if the AI call is unavailable
 
 ### Dataset Upload
 - Upload custom CSV datasets
@@ -46,7 +52,7 @@ CustomerIQ is a full-stack Machine Learning web application that performs custom
 ### Frontend
 - React.js
 - Vite
-- Tailwind CSS
+- Custom CSS (no UI framework)
 - Recharts
 - Axios
 
@@ -56,6 +62,7 @@ CustomerIQ is a full-stack Machine Learning web application that performs custom
 - Pandas
 - NumPy
 - Scikit-Learn
+- httpx
 
 ### Machine Learning
 - K-Means Clustering
@@ -63,6 +70,9 @@ CustomerIQ is a full-stack Machine Learning web application that performs custom
 - StandardScaler
 - Silhouette Score
 - Train-Test Split
+
+### Generative AI
+- Groq API (Llama 3.3 70B) for retention recommendation generation
 
 ### Database
 - MongoDB
@@ -81,9 +91,11 @@ CustomerIQ/
 ├── backend/
 │   ├── main.py
 │   ├── model.py
+│   ├── ai_recommend.py
 │   ├── data_loader.py
 │   ├── auth.py
 │   ├── database.py
+│   ├── Mall_Customers.csv
 │   ├── requirements.txt
 │   └── runtime.txt
 │
@@ -97,8 +109,6 @@ CustomerIQ/
 │   │
 │   ├── package.json
 │   └── vite.config.js
-│
-└── datasets/
 ```
 
 ---
@@ -161,6 +171,19 @@ Evaluation Metrics:
 - Recall
 - F1 Score
 
+### AI Retention Recommendation
+
+Once a customer is scored, their profile and predicted risk can be sent to an LLM (Groq — Llama 3.3 70B) to generate a specific retention recommendation grounded in that customer's data, rather than a fixed string per risk tier.
+
+Input to the model:
+
+- Full customer profile (gender, age, income, spending score, visit frequency, satisfaction score, complaints count, loyalty points)
+- Predicted churn risk, cluster, and confidence score
+
+Output:
+
+- A short, reasoned retention strategy (2–3 sentences) referencing the specific numbers that justify it
+
 ---
 
 ## API Endpoints
@@ -196,6 +219,7 @@ Evaluation Metrics:
 | Method | Endpoint | Description |
 |----------|----------|----------|
 | POST | /predict | Churn Prediction |
+| POST | /recommend | AI-Generated Retention Recommendation (Groq) |
 
 ---
 
@@ -225,6 +249,17 @@ Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+Create a `.env` file inside `backend/` with:
+
+```text
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_ALGORITHM=HS256
+GROQ_API_KEY=your_groq_api_key
+```
+
+`GROQ_API_KEY` is free to generate at [console.groq.com](https://console.groq.com) and is only required for the AI retention recommendation feature — the rest of the app runs without it.
 
 Run backend:
 
@@ -321,6 +356,8 @@ ChurnRisk
 - Real-time customer monitoring
 - Advanced customer behavior analytics
 - Multi-user workspace support
+- Automated delivery of AI-generated recommendations via email/SMS
+- Model explainability (e.g. SHAP) for Random Forest predictions
 
 ---
 
@@ -333,6 +370,7 @@ This project demonstrates:
 - Supervised Learning (Random Forest classifier)
 - Feature Engineering
 - Data Preprocessing
+- LLM / Generative AI API Integration (Groq)
 - FastAPI Backend Development
 - React Frontend Development
 - REST API Integration

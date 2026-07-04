@@ -1,4 +1,4 @@
-# CustomerIQ – Mall Customer Churn Prediction & Segmentation System
+# CustomerIQ – Customer Retention System
 
 CustomerIQ is a full-stack Machine Learning web application that performs customer segmentation using K-Means Clustering and customer churn prediction using Random Forest Classification. Users can upload their own datasets, perform clustering analysis, visualize customer segments, predict churn risk, and generate AI-powered, profile-specific retention recommendations through an interactive dashboard.
 

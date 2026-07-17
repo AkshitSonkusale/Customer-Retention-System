@@ -182,7 +182,7 @@ Input to the model:
 
 Output:
 
-- A short, reasoned retention strategy (2–3 sentences) referencing the specific numbers that justify it
+- A short, reasoned retention strategy (2–3 sentences) referencing the specific numbers that justify the recommendations provided and justify them.
 
 ---
 

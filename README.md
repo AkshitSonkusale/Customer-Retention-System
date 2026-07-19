@@ -1,363 +1,323 @@
-# CustomerIQ – Customer Retention System
+# Customer Retention Intelligence System
 
-CustomerIQ is a full-stack Machine Learning web application that performs customer segmentation using K-Means Clustering and customer churn prediction using Random Forest Classification. Users can upload their own datasets, perform clustering analysis, visualize customer segments, predict churn risk, and generate AI-powered, profile-specific retention recommendations through an interactive dashboard.
+A full-stack Machine Learning web application that identifies at-risk customers using K-Means Clustering and Random Forest / XGBoost Classification, segments them into behavioural groups, and generates AI-powered personalised retention strategies via Groq LLM — all through an interactive analytics dashboard.
+
+> Built with FastAPI, React, MongoDB Atlas, and Groq (Llama 3.3 70B). Deployed on Render.
+
+---
 
 ## Features
 
 ### Customer Segmentation
-- K-Means Clustering
-- Elbow Method for optimal K selection
-- Silhouette Score evaluation
+- K-Means Clustering (k-means++ initialisation)
+- Elbow Method for optimal k selection
+- Silhouette Score cluster quality evaluation
 - Cluster-wise customer analysis
-- Risk categorization (High, Medium, Low)
-- Interactive visualizations
+- Risk categorisation — High 🔴 / Medium 🟡 / Low 🟢
+- Interactive scatter plot and elbow curve visualisations
 
-### Churn Prediction
-- Random Forest Classifier
-- Predicts customer churn risk
-- Confidence score generation
-- Personalized recommendations
-- Risk-level classification
+### Churn Risk Classification
+- **Random Forest Classifier** — interpretable feature importances, robust on tabular data
+- **XGBoost Classifier** — gradient boosting with regularisation, benchmarked against Random Forest
+- Confidence score per prediction
+- Risk-level classification with per-cluster stats
 
 ### AI Retention Recommendations
-- On-demand, LLM-generated retention strategy per customer (Groq — Llama 3.3 70B)
-- Reasons over the full profile (age, income, spending trend, complaints, loyalty points) instead of returning a generic templated offer
-- Kept as a separate, opt-in call so the core prediction endpoint stays fast and free
-- Falls back gracefully to the static recommendation if the AI call is unavailable
+- On-demand LLM-generated retention strategy per customer (Groq — Llama 3.3 70B)
+- Reasons over the full behavioural profile (age, income, spending score, visit frequency, satisfaction score, complaints, loyalty points) instead of returning a generic templated offer
+- Separate opt-in `/recommend` endpoint so the core prediction stays fast
+- Falls back gracefully to a static recommendation if the Groq call is unavailable
 
 ### Dataset Upload
-- Upload custom CSV datasets
-- Automatic column mapping
-- Dataset preview
-- Dynamic clustering on uploaded datasets
+- Upload any custom CSV dataset
+- Automatic column mapping with smart suggestions
+- 5-row dataset preview before confirming
+- Dynamic clustering and classification on uploaded data
+- Reset to default dataset with one click
 
 ### Dashboard Analytics
-- Cluster distribution charts
-- Income vs Spending scatter plots
-- Elbow curve visualization
-- Customer segmentation tables
-- Risk breakdown summaries
-- Model performance metrics
+- KPI cards — High / Medium / Low risk counts + Silhouette Score
+- Random Forest / XGBoost model metrics (Accuracy, Precision, Recall, F1)
+- Feature importance breakdown
+- Income vs Spending Score scatter plot (colored by cluster)
+- Elbow curve visualisation (WCSS vs k)
+- Full customer table with filter, sort, and search
+- Risk breakdown summaries per cluster
 
 ### Authentication
-- User registration
-- User login
-- JWT authentication
-- Secure API access
+- User registration and login
+- JWT token-based authentication
+- bcrypt password hashing
+- MongoDB Atlas user storage
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- React.js
-- Vite
-- Custom CSS (no UI framework)
-- Recharts
+- React 18, Vite
+- Custom CSS — dark/light theme, comic-book inspired design
+- Recharts (scatter plot, line chart)
 - Axios
+- Lucide React (icons)
 
 ### Backend
-- FastAPI
-- Python
-- Pandas
-- NumPy
-- Scikit-Learn
-- httpx
+- FastAPI, Uvicorn
+- Python 3.11
+- Pandas, NumPy
+- Scikit-learn (KMeans, StandardScaler, RandomForestClassifier)
+- XGBoost
+- python-jose (JWT), passlib + bcrypt (auth)
+- PyMongo
 
 ### Machine Learning
-- K-Means Clustering
-- Random Forest Classification
-- StandardScaler
-- Silhouette Score
-- Train-Test Split
+- K-Means Clustering (unsupervised — Stage 1)
+- Random Forest Classification (supervised — Stage 2, option A)
+- XGBoost Classification (supervised — Stage 2, option B)
+- StandardScaler for feature normalisation
+- Silhouette Score for cluster quality
+- 80/20 train-test split with stratification
 
 ### Generative AI
-- Groq API (Llama 3.3 70B) for retention recommendation generation
+- Groq API — Llama 3.3 70B for personalised retention recommendation generation
 
 ### Database
-- MongoDB
+- MongoDB Atlas — user authentication collection
 
 ### Deployment
-- Frontend: Render / Vercel
-- Backend: Render
+- Frontend: Render (Static Site)
+- Backend: Render (Web Service)
+- Version Control: GitHub
 
 ---
 
 ## Project Structure
 
-```bash
+```
 CustomerIQ/
 │
 ├── backend/
-│   ├── main.py
-│   ├── model.py
-│   ├── ai_recommend.py
-│   ├── data_loader.py
-│   ├── auth.py
-│   ├── database.py
-│   ├── Mall_Customers.csv
+│   ├── main.py              # FastAPI app, all routes
+│   ├── model.py             # K-Means + RF / XGBoost pipeline
+│   ├── ai_recommend.py      # Groq LLM retention recommendation
+│   ├── data_loader.py       # CSV loading, upload store, preprocessing
+│   ├── auth.py              # JWT creation/verification, bcrypt hashing
+│   ├── database.py          # MongoDB Atlas connection
+│   ├── Mall_Customers.csv   # Default dataset (200 rows)
 │   ├── requirements.txt
 │   └── runtime.txt
 │
-├── frontend/
-│   ├── src/
-│   │   ├── app.jsx
-│   │   ├── main.jsx
-│   │   ├── api.js
-│   │   ├── components/
-│   │   └── pages/
-│   │
-│   ├── package.json
-│   └── vite.config.js
+└── frontend/
+    ├── src/
+    │   ├── app.jsx                  # Root component, auth + routing
+    │   ├── main.jsx
+    │   ├── api.js                   # All Axios API calls
+    │   ├── index.css                # CSS variables, dark/light themes
+    │   ├── components/
+    │   │   └── PixelLogo.jsx        # Animated pixel-grid Ci logo
+    │   └── pages/
+    │       ├── Login.jsx
+    │       ├── Signup.jsx
+    │       ├── AuthBackground.jsx   # Particle canvas animation
+    │       ├── Dashboard.jsx
+    │       ├── Customers.jsx
+    │       ├── Predict.jsx
+    │       └── Upload.jsx
+    ├── package.json
+    └── vite.config.js
 ```
 
 ---
 
-## Machine Learning Workflow
+## ML Pipeline
 
-### Customer Segmentation
+### Stage 1 — K-Means Clustering (Unsupervised)
 
-Features Used:
+Features used: `AnnualIncome`, `SpendingScore` only
 
-- AnnualIncome
-- SpendingScore
-
-Steps:
-
-1. Data Loading
-2. Data Preprocessing
-3. Feature Scaling
-4. K-Means Clustering
-5. Elbow Method
-6. Silhouette Score Evaluation
-7. Cluster Analysis
-8. Risk Assignment
-
-### Churn Prediction
-
-Features Used:
-
-- Age
-- AnnualIncome
-- SpendingScore
-- VisitFrequency
-- SatisfactionScore
-- ComplaintsCount
-- LoyaltyPoints
-
-Target Variable:
-
-- ChurnRisk
-
-Classes:
-
-- Low
-- Medium
-- High
-
-Model:
+Age and Gender deliberately excluded — including them drops the Silhouette Score from ~0.485 to ~0.32, confirmed by XGBoost and Random Forest feature importances showing Age at <1% contribution.
 
 ```python
-RandomForestClassifier(
-    n_estimators=100,
-    random_state=42
-)
+KMeans(n_clusters=5, init='k-means++', n_init=10, random_state=42)
 ```
 
-Evaluation Metrics:
+Optimal k selected via Elbow Method (WCSS vs k=1–10).
 
-- Accuracy
-- Precision
-- Recall
-- F1 Score
+### Stage 2 — Classification (Supervised)
 
-### AI Retention Recommendation
+Features used:
+```
+Age, AnnualIncome, SpendingScore, VisitFrequency,
+SatisfactionScore, ComplaintsCount, LoyaltyPoints
+```
 
-Once a customer is scored, their profile and predicted risk can be sent to an LLM (Groq — Llama 3.3 70B) to generate a specific retention recommendation grounded in that customer's data, rather than a fixed string per risk tier.
+Target: `ChurnRisk` — High / Medium / Low
 
-Input to the model:
+Two models evaluated:
 
-- Full customer profile (gender, age, income, spending score, visit frequency, satisfaction score, complaints count, loyalty points)
-- Predicted churn risk, cluster, and confidence score
+```python
+# Option A
+RandomForestClassifier(n_estimators=100, random_state=42)
 
-Output:
+# Option B
+XGBClassifier(n_estimators=100, random_state=42, eval_metric='mlogloss')
+```
 
-- A short, reasoned retention strategy (2–3 sentences) referencing the specific numbers that justify the recommendations provided and justify them.
+Random Forest provides interpretable feature importances. XGBoost offers gradient boosting with regularisation for improved generalisation. Both are evaluated on the same 80/20 stratified train-test split.
+
+### Stage 3 — AI Recommendation (Generative AI)
+
+Customer profile + predicted risk tier sent to Groq (Llama 3.3 70B) → 2–3 sentence personalised retention strategy referencing the customer's specific numbers.
+
+### Risk Tiers
+
+| Tier | Avg Cluster Spending | Action |
+|---|---|---|
+| 🔴 High Risk | < 35 | Immediate — discount, loyalty invite |
+| 🟡 Medium Risk | 35–55 | Monitor — seasonal offer, membership upgrade |
+| 🟢 Low Risk | > 55 | Maintain — VIP events, exclusive access |
 
 ---
 
-## API Endpoints
+## API Reference
+
+Base URL: `https://customeriq-backend.onrender.com`
 
 ### Authentication
 
-| Method | Endpoint | Description |
-|----------|----------|----------|
-| POST | /auth/signup | Register User |
-| POST | /auth/login | User Login |
-| GET | /auth/me | Current User |
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/signup` | ✗ | Register new user |
+| POST | `/auth/login` | ✗ | Login, returns JWT token |
+| GET | `/auth/me` | ✓ | Current user info |
 
 ### Dataset Management
 
-| Method | Endpoint | Description |
-|----------|----------|----------|
-| POST | /upload | Upload Dataset |
-| POST | /upload/confirm | Confirm Column Mapping |
-| GET | /dataset/info | Dataset Information |
-| DELETE | /dataset | Reset Dataset |
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/upload` | ✓ | Step 1: Upload CSV, get column suggestions + token |
+| POST | `/upload/confirm` | ✓ | Step 2: Confirm column mapping |
+| GET | `/dataset/info` | ✓ | Active dataset source and row count |
+| DELETE | `/dataset` | ✓ | Reset to default dataset |
 
-### Clustering
+### Clustering & Analysis
 
-| Method | Endpoint | Description |
-|----------|----------|----------|
-| GET | /cluster?k=5 | Perform K-Means |
-| GET | /summary?k=5 | Cluster Summary |
-| GET | /elbow?max_k=10 | Elbow Method |
-| GET | /metrics | Model Metrics |
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/cluster?k=5` | ✓ | Run K-Means, return scatter data + labels |
+| GET | `/summary?k=5` | ✓ | Cluster stats + risk breakdown |
+| GET | `/customers?k=5` | ✓ | All customers with risk labels |
+| GET | `/elbow?max_k=10` | ✓ | WCSS values for elbow chart |
+| GET | `/metrics` | ✓ | RF / XGBoost accuracy, precision, recall, F1, feature importances |
 
-### Prediction
+### Prediction & AI
 
-| Method | Endpoint | Description |
-|----------|----------|----------|
-| POST | /predict | Churn Prediction |
-| POST | /recommend | AI-Generated Retention Recommendation (Groq) |
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/predict` | ✓ | Predict churn risk for one customer |
+| POST | `/recommend` | ✓ | Groq LLM personalised retention recommendation |
 
----
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/your-username/customeriq.git
-cd customeriq
+**POST `/predict` body:**
+```json
+{
+  "age": 28,
+  "annualIncome": 65,
+  "spendingScore": 72,
+  "gender": "Female",
+  "visitFrequency": 10,
+  "satisfactionScore": 8,
+  "complaintsCount": 0,
+  "loyaltyPoints": 4500
+}
 ```
 
+Swagger docs: `https://customeriq-backend.onrender.com/docs`
+
 ---
 
-### Backend Setup
+## Local Setup
 
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- MongoDB Atlas account (free tier)
+- Groq API key — free at [console.groq.com](https://console.groq.com)
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/AkshitSonkusale/Mall-Customer-Churn-Prediction-System.git
+cd Mall-Customer-Churn-Prediction-System
+```
+
+### 2. Backend setup
 ```bash
 cd backend
-
 python -m venv venv
-
-venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
 pip install -r requirements.txt
 ```
 
-Create a `.env` file inside `backend/` with:
-
-```text
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-JWT_ALGORITHM=HS256
-GROQ_API_KEY=your_groq_api_key
+Create `backend/.env`:
+```env
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
+DB_NAME=mallchurn
+JWT_SECRET=your-secret-key-here
+JWT_EXPIRE_MINUTES=1440
+GROQ_API_KEY=your-groq-api-key-here
 ```
-
-`GROQ_API_KEY` is free to generate at [console.groq.com](https://console.groq.com) and is only required for the AI retention recommendation feature — the rest of the app runs without it.
-
-Run backend:
 
 ```bash
-uvicorn main:app --reload
+uvicorn main:app --reload --port 8000
+# API  → http://localhost:8000
+# Docs → http://localhost:8000/docs
 ```
 
-Backend URL:
-
-```text
-http://localhost:8000
-```
-
-Swagger Documentation:
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-### Frontend Setup
-
+### 3. Frontend setup
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
-```
-
-Frontend URL:
-
-```text
-http://localhost:5173
+# App → http://localhost:5173
 ```
 
 ---
 
 ## Dataset Format
 
-Required Columns:
+### Minimum required columns
 
-```text
-CustomerID
-Gender
-Age
-AnnualIncome
-SpendingScore
-```
+| Column | Type | Description |
+|---|---|---|
+| Age | Integer | Customer age |
+| AnnualIncome | Integer | Yearly income in thousands |
+| SpendingScore | Integer | Mall-assigned score 1–100 |
 
-Optional Columns:
+### Optional columns (enable full RF / XGBoost pipeline)
 
-```text
-VisitFrequency
-SatisfactionScore
-ComplaintsCount
-LoyaltyPoints
-CustomerSegment
-ChurnRisk
-```
-
----
-
-## Screenshots
-
-### Dashboard
-
-- Customer Segmentation
-- Cluster Distribution
-- Risk Analysis
-- Churn Prediction
-
-### Upload Dataset
-
-- CSV Upload
-- Column Mapping
-- Dataset Preview
-
-### Customer Prediction
-
-- Risk Category
-- Confidence Score
-- Recommendations
+| Column | Type | Description |
+|---|---|---|
+| CustomerID | Integer | Unique identifier |
+| Gender | String | Male / Female |
+| VisitFrequency | Integer | Monthly mall visits |
+| SatisfactionScore | Float | Rating 1–10 |
+| ComplaintsCount | Integer | Number of complaints |
+| LoyaltyPoints | Integer | Accumulated points |
+| ChurnRisk | String | High / Medium / Low (target label) |
 
 ---
 
 ## Future Improvements
 
-- Deep Learning based churn prediction
-- AutoML integration
-- PDF report generation
-- Downloadable analytics reports
-- Real-time customer monitoring
-- Advanced customer behavior analytics
-- Multi-user workspace support
-- Automated delivery of AI-generated recommendations via email/SMS
-- Model explainability (e.g. SHAP) for Random Forest predictions
+- XGBoost final model selection based on cross-validated F1 score
+- SHAP values for per-prediction explainability
+- Time-series trend features — spending score trajectory over months
+- Feedback loop — track whether flagged customers were retained, retrain on outcomes
+- PDF report generation and download
+- Automated email/SMS delivery of AI recommendations via SendGrid
+- Real-time customer risk monitoring with alerts
+- Multi-user workspace with role-based access (Admin / Analyst)
+- AutoML integration for automatic model selection
 
 ---
 
@@ -365,30 +325,27 @@ ChurnRisk
 
 This project demonstrates:
 
-- Machine Learning Model Development
-- Unsupervised Learning (K-Means)
-- Supervised Learning (Random Forest classifier)
-- Feature Engineering
-- Data Preprocessing
-- LLM / Generative AI API Integration (Groq)
-- FastAPI Backend Development
-- React Frontend Development
-- REST API Integration
-- MongoDB Integration
-- Full-Stack Deployment
+- Unsupervised Learning — K-Means Clustering, Elbow Method, Silhouette Score
+- Supervised Learning — Random Forest and XGBoost classification, model benchmarking
+- Feature Engineering and selection (validated via feature importances)
+- Generative AI API Integration — Groq (Llama 3.3 70B)
+- FastAPI backend with JWT authentication
+- React frontend with custom dark/light theming
+- MongoDB Atlas integration
+- Full-stack deployment on Render
+- Two-stage ML pipeline design
 
 ---
 
 ## Author
 
-Akshit Sonkusale
+**Akshit Sonkusale**
+B.Tech Computer Science (Data Science) — Anurag University, Hyderabad
 
-Computer Science Engineering student specializing in Data Science
-
-Machine Learning • Data Science • Full Stack Development
+[GitHub](https://github.com/AkshitSonkusale)
 
 ---
 
 ## License
 
-This project is developed for educational and academic purposes.
+Developed for educational and academic purposes.
